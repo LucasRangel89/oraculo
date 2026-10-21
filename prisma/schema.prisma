@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Analysis {
+  id              String    @id @default(cuid())
+  input           String
+  normalizedInput String    @unique
+  payload         String // JSON.stringify(AnalysisResult)
+  confidence      Float     @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  feedback        Feedback?
+}
+
+model Feedback {
+  id         String   @id @default(cuid())
+  analysisId String   @unique
+  useful     Boolean
+  comment    String?
+  createdAt  DateTime @default(now())
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+}

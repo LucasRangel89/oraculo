@@ -1,0 +1,334 @@
+"use client";
+
+import { useState } from "react";
+import {
+  AlertTriangle,
+  Check,
+  Copy,
+  Download,
+  Info,
+  RotateCcw,
+  Sparkles,
+  ThumbsDown,
+  ThumbsUp,
+} from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { ScoreRing } from "@/components/oracle/ScoreRing";
+import { ParallelsList } from "@/components/oracle/ParallelsList";
+import { NarrativeGraph } from "@/components/oracle/NarrativeGraph";
+import { AgentPanels } from "@/components/oracle/AgentPanels";
+import { copyJson, downloadJson } from "@/lib/oracle-client";
+import { useOracleStore } from "@/lib/oracle-store";
+import {
+  MEDIA_TYPE_COLORS,
+  MEDIA_TYPE_LABELS,
+  type AnalysisResult,
+} from "@/lib/oracle-types";
+import { toast } from "@/hooks/use-toast";
+
+// ----------------------------------------------------------------- FactsCard
+
+function FactsCard({ result }: { result: AnalysisResult }) {
+  const { facts, fingerprint } = result;
+  const maxMotifs = 8;
+  const shownMotifs = fingerprint.motifs.slice(0, maxMotifs);
+  const extraMotifs = fingerprint.motifs.length - shownMotifs.length;
+
+  return (
+    <section
+      className="flex flex-col gap-5 rounded-xl border border-slate-800 bg-slate-900/60 p-5 md:flex-row md:items-start md:justify-between md:p-6"
+      aria-label="Fatos da narrativa"
+    >
+      <div className="min-w-0 flex-1">
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <Badge
+            variant="outline"
+            className="border-slate-700 bg-slate-950/50 text-xs text-slate-200"
+          >
+            <span
+              className="mr-0.5 inline-block size-2 rounded-full"
+              style={{ backgroundColor: MEDIA_TYPE_COLORS[facts.type] }}
+              aria-hidden="true"
+            />
+            {MEDIA_TYPE_LABELS[facts.type]}
+          </Badge>
+          <Badge
+            variant="outline"
+            className="border-slate-700 bg-slate-950/50 text-xs text-slate-300"
+          >
+            {facts.origin}
+          </Badge>
+          <Badge
+            variant="outline"
+            className="border-slate-700 bg-slate-950/50 text-xs text-slate-400"
+          >
+            {facts.period}
+          </Badge>
+          {result.cached ? (
+            <Badge
+              variant="outline"
+              className="border-amber-400/40 bg-amber-400/10 text-[10px] uppercase tracking-wider text-amber-300"
+            >
+              do cache
+            </Badge>
+          ) : null}
+        </div>
+
+        <h2 className="oracle-title font-serif text-2xl font-bold leading-tight md:text-3xl">
+          {facts.name}
+        </h2>
+
+        <p className="mt-2.5 max-w-3xl text-sm leading-relaxed text-slate-300">
+          {facts.synopsis}
+        </p>
+
+        {shownMotifs.length > 0 ? (
+          <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
+            {shownMotifs.map((motif) => (
+              <Badge
+                key={motif}
+                variant="secondary"
+                className="bg-slate-800/70 px-2 py-0.5 font-mono text-[10px] font-normal text-slate-300"
+              >
+                {motif.replace(/_/g, " ")}
+              </Badge>
+            ))}
+            {extraMotifs > 0 ? (
+              <Badge
+                variant="secondary"
+                className="bg-indigo-500/15 px-2 py-0.5 text-[10px] font-medium text-indigo-300"
+              >
+                +{extraMotifs}
+              </Badge>
+            ) : null}
+          </div>
+        ) : null}
+
+        {!facts.found && facts.variants.length > 0 ? (
+          <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-amber-400/25 bg-amber-400/5 px-3 py-2">
+            <AlertTriangle className="size-4 shrink-0 text-amber-400" aria-hidden="true" />
+            <span className="text-xs text-amber-200/90">
+              Narrativa não reconhecida com precisão. Você quis dizer:
+            </span>
+            {facts.variants.map((variant) => (
+              <Badge
+                key={variant}
+                variant="outline"
+                className="cursor-pointer border-amber-400/40 bg-transparent text-amber-200 hover:bg-amber-400/10"
+                onClick={() => {
+                  useOracleStore.getState().setInput(variant);
+                  void useOracleStore.getState().startAnalysis();
+                }}
+              >
+                {variant}
+              </Badge>
+            ))}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="shrink-0 self-start md:pl-4">
+        <ScoreRing value={result.confidence * 100} size={88} label="Confiança" />
+      </div>
+    </section>
+  );
+}
+
+// --------------------------------------------------------------- SummaryCard
+
+function SummaryCard({ result }: { result: AnalysisResult }) {
+  return (
+    <section
+      className="rounded-xl border border-indigo-400/20 bg-gradient-to-br from-indigo-500/10 via-slate-900/60 to-slate-900/60 p-5 md:p-6"
+      aria-label="Síntese do Oráculo"
+    >
+      <h3 className="mb-2 flex items-center gap-2 font-serif text-lg font-semibold text-slate-100">
+        <Sparkles className="size-4 text-amber-300" aria-hidden="true" />
+        Síntese do Oráculo
+      </h3>
+      <p className="max-w-4xl text-sm leading-relaxed text-slate-300">
+        {result.summary}
+      </p>
+      <Alert className="mt-4 border-slate-800 bg-slate-950/40 py-2.5">
+        <Info className="size-3.5 text-slate-500" aria-hidden="true" />
+        <AlertDescription className="text-xs text-slate-500">
+          Interpretação gerada por IA — hipóteses heurísticas, não fatos.
+        </AlertDescription>
+      </Alert>
+    </section>
+  );
+}
+
+// ----------------------------------------------------------------- ActionBar
+
+function ActionBar({ result }: { result: AnalysisResult }) {
+  const feedbackSent = useOracleStore((s) => s.feedbackSent);
+  const submitFeedbackAction = useOracleStore((s) => s.submitFeedbackAction);
+  const resetToSearch = useOracleStore((s) => s.resetToSearch);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [comment, setComment] = useState("");
+
+  const handleCopy = async () => {
+    try {
+      await copyJson(result);
+      toast({ title: "JSON copiado!", description: "Análise completa na área de transferência." });
+    } catch {
+      toast({
+        title: "Não foi possível copiar",
+        description: "Seu navegador bloqueou o acesso à área de transferência.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const submitNegative = async () => {
+    setDialogOpen(false);
+    await submitFeedbackAction(false, comment);
+    setComment("");
+  };
+
+  return (
+    <section
+      className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/60 p-4"
+      aria-label="Ações da análise"
+    >
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => downloadJson(result)}
+        className="border-slate-700 bg-slate-950/40 text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+      >
+        <Download className="size-4" aria-hidden="true" />
+        Exportar JSON
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => void handleCopy()}
+        className="border-slate-700 bg-slate-950/40 text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+      >
+        <Copy className="size-4" aria-hidden="true" />
+        Copiar JSON
+      </Button>
+
+      <div className="mx-1 hidden h-6 w-px bg-slate-800 sm:block" aria-hidden="true" />
+
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-slate-400">Esta análise foi útil?</span>
+        <Button
+          variant="outline"
+          size="icon"
+          disabled={feedbackSent}
+          onClick={() => void submitFeedbackAction(true)}
+          aria-label="Sim, foi útil"
+          title="Sim, foi útil"
+          className="size-8 border-slate-700 bg-slate-950/40 text-slate-400 hover:border-emerald-400/40 hover:bg-emerald-400/10 hover:text-emerald-300"
+        >
+          {feedbackSent ? <Check className="size-4" /> : <ThumbsUp className="size-4" />}
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          disabled={feedbackSent}
+          onClick={() => setDialogOpen(true)}
+          aria-label="Não foi útil (comentário opcional)"
+          title="Não foi útil (comentário opcional)"
+          className="size-8 border-slate-700 bg-slate-950/40 text-slate-400 hover:border-red-400/40 hover:bg-red-400/10 hover:text-red-300"
+        >
+          <ThumbsDown className="size-4" aria-hidden="true" />
+        </Button>
+      </div>
+
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={resetToSearch}
+        className="ml-auto border-amber-400/30 bg-amber-400/5 text-amber-200 hover:bg-amber-400/15 hover:text-amber-100"
+      >
+        <RotateCcw className="size-4" aria-hidden="true" />
+        Nova Análise
+      </Button>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="border-slate-800 bg-slate-900 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-slate-100">
+              O que poderia ser melhor?
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Seu comentário é anônimo e ajuda a calibrar as lentes do Oráculo.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Ex.: paralelos pouco relevantes, símbolos genéricos..."
+            rows={4}
+            className="border-slate-700 bg-slate-950/60 text-slate-200 placeholder:text-slate-600"
+            aria-label="Comentário sobre a análise"
+          />
+          <DialogFooter className="gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setDialogOpen(false)}
+              className="text-slate-400 hover:text-slate-200"
+            >
+              Cancelar
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => void submitNegative()}
+              className="bg-indigo-500 text-white hover:bg-indigo-400"
+            >
+              Enviar feedback
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
+}
+
+// ----------------------------------------------------------------- Dashboard
+
+export function Dashboard() {
+  const result = useOracleStore((s) => s.result);
+  const openComparison = useOracleStore((s) => s.openComparison);
+
+  if (!result) return null;
+
+  const handleSelectConnection = (bName: string, bOrigin: string) => {
+    void openComparison({
+      aName: result.facts.name,
+      aOrigin: result.facts.origin,
+      bName,
+      bOrigin,
+      aMotifs: result.fingerprint.motifs,
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <FactsCard result={result} />
+      <SummaryCard result={result} />
+      <div className="grid gap-4 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)_minmax(280px,370px)]">
+        <ParallelsList result={result} onSelect={(c) => handleSelectConnection(c.name, c.origin)} />
+        <NarrativeGraph result={result} onSelect={handleSelectConnection} />
+        <AgentPanels result={result} />
+      </div>
+      <ActionBar result={result} />
+    </div>
+  );
+}
