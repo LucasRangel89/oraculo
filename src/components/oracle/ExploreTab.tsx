@@ -181,7 +181,7 @@ export function ExploreTab() {
             </SelectTrigger>
             <SelectContent className="max-h-[320px] border-slate-800 bg-slate-900">
               <SelectItem value="todas" className="text-slate-300">
-                Todas as tradições ({catalog.length})
+                Todas as tradições
               </SelectItem>
               {origins.map(([name, count]) => (
                 <SelectItem key={name} value={name} className="text-slate-300">
