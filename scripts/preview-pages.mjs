@@ -7,6 +7,8 @@
  * resolve `/caminho/` → `/caminho/index.html`, como o Pages.
  *
  * Uso: `npm run preview:pages` (porta 4000, sobrescreva com PORT=8080).
+ * A raiz redireciona para o subcaminho do site, para que o preview do sandbox
+ * abra a página certa sem ninguém precisar digitar `/oraculo/`.
  */
 import { createServer } from "node:http";
 import { createReadStream, existsSync, statSync } from "node:fs";
@@ -55,6 +57,14 @@ function resolveFile(pathname) {
 
 const server = createServer((req, res) => {
   const url = new URL(req.url ?? "/", `http://localhost:${port}`);
+
+  // Na raiz, manda para o subcaminho real do site (como o Pages faria).
+  if (basePath && (url.pathname === "/" || url.pathname === "")) {
+    res.writeHead(302, { Location: `${basePath}/${url.search}` });
+    res.end();
+    return;
+  }
+
   const file = resolveFile(url.pathname);
 
   if (!file) {
