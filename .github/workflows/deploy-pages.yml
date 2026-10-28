@@ -34,6 +34,9 @@ jobs:
           cache: npm
 
       - name: Dependências
+        env:
+          # o client do Prisma não é usado no build estático (evita download de engines)
+          PRISMA_SKIP_POSTINSTALL_GENERATE: "1"
         run: npm ci --legacy-peer-deps --no-audit --no-fund || npm install --legacy-peer-deps --no-audit --no-fund
 
       - name: Calcular subcaminho
@@ -59,8 +62,13 @@ jobs:
           PAGES_BASE_PATH: ${{ steps.base.outputs.path }}
         run: npm run verify:pages
 
+      # `enablement: true` ativa o Pages no repositório caso ainda não esteja
+      # ligado (Settings → Pages → Source: GitHub Actions) — assim o primeiro
+      # deploy não depende de nenhum passo manual.
       - name: Configurar Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Empacotar
         uses: actions/upload-pages-artifact@v3
