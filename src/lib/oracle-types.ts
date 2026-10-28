@@ -398,7 +398,8 @@ export interface EngineStatus {
   provider: string;
   model: string;
   reason: string;
-  store: "prisma" | "file";
+  /** "browser" = build estático (GitHub Pages), persistido em localStorage */
+  store: "prisma" | "file" | "browser";
   catalog: {
     narratives: number;
     traditions: number;

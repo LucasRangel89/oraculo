@@ -96,10 +96,10 @@ export function Header() {
         ) : null}
 
         <a
-          href="https://github.com"
+          href="https://github.com/LucasRangel89/oraculo"
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Repositório no GitHub (substitua pelo seu link)"
+          aria-label="Repositório do Oráculo no GitHub"
           title="Repositório no GitHub"
           className="rounded-md p-2 text-slate-400 transition-colors outline-none hover:bg-slate-800/60 hover:text-slate-200 focus-visible:ring-2 focus-visible:ring-indigo-400/60"
         >

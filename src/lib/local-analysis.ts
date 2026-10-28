@@ -16,7 +16,7 @@
  * Este módulo é server-side.
  */
 import { CATALOG } from "@/lib/oracle-catalog";
-import { NarrativeNotFoundError } from "@/lib/oracle-agents";
+import { NarrativeNotFoundError } from "@/lib/oracle-errors";
 import { buildParallelConnections } from "@/lib/parallels";
 import { findReferenceDossier, type ReferenceDossier } from "@/lib/reference-analyses";
 import {

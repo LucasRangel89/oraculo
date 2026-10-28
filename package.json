@@ -12,7 +12,10 @@
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
     "smoke": "node scripts/smoke.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:pages": "node scripts/build-pages.mjs",
+    "preview:pages": "npx --yes serve out -l 4000",
+    "verify:pages": "node scripts/verify-static.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

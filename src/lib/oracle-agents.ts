@@ -16,6 +16,7 @@ import type {
   ThematicAnalysis,
 } from "@/lib/oracle-types";
 import { callLLMJson } from "@/lib/llm";
+import { NarrativeNotFoundError } from "@/lib/oracle-errors";
 import {
   ARCHETYPES_SYSTEM,
   CULTURAL_SYSTEM,
@@ -39,14 +40,8 @@ export { callLLMJson };
 // ---------------------------------------------------------------------------
 
 /** Erro emitido quando o Agente Identificador não reconhece a narrativa. */
-export class NarrativeNotFoundError extends Error {
-  variants: string[];
-  constructor(message: string, variants: string[]) {
-    super(message);
-    this.name = "NarrativeNotFoundError";
-    this.variants = variants;
-  }
-}
+export { NarrativeNotFoundError };
+
 
 // ---------------------------------------------------------------------------
 // Helpers de extração/validação
