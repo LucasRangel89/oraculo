@@ -1031,7 +1031,7 @@ function localSummary(facts: NarrativeFacts, parallels: Connection[], source: An
       ? "O dossiê curado do acervo legado"
       : "A leitura determinística sobre o catálogo";
   const elenco = facts.characters.slice(0, 2).join(" e ");
-  return `${origem} situa ${facts.name} (${facts.origin}) no centro de uma rede de motivos recorrentes${elenco ? `, com ${elenco} como eixo da travessia` : ""}. O paralelo mais forte é ${top.name} (${Math.round(top.score)}/100) — ${top.reason} Em seguida aparecem ${others}. O conjunto mostra que a força da história não está em sua originalidade absoluta, mas na maneira específica como recombina padrões arquetípicos já circulantes — e é justamente essa recombinação que o Oráculo torna visível.`;
+  return `${origem} situa ${facts.name}, de ${facts.origin}, no centro de uma rede de motivos recorrentes${elenco ? `, com ${elenco} como eixo da travessia` : ""}. O paralelo mais forte é ${top.name} (${Math.round(top.score)}/100) — ${top.reason} Em seguida aparecem ${others}. O conjunto mostra que a força da história não está em sua originalidade absoluta, mas na maneira específica como recombina padrões arquetípicos já circulantes — e é justamente essa recombinação que o Oráculo torna visível.`;
 }
 
 
