@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect -- boilerplate shadcn/ui: isMobile embla api publicados via effect */
 "use client"
 
 import * as React from "react"

@@ -73,12 +73,24 @@ export function ParallelsList({ result, onSelect }: ParallelsListProps) {
                     </div>
                     <Badge
                       variant="outline"
+                      title={
+                        typeof c.rawScore === "number"
+                          ? `Índice calibrado ${Math.round(c.score)} · similaridade bruta ${c.rawScore}`
+                          : undefined
+                      }
                       className={`shrink-0 font-mono text-xs ${scoreColor(c.score)}`}
                     >
                       {Math.round(c.score)}%
                     </Badge>
                   </div>
-                  <p className="mb-2 truncate text-xs text-slate-500">{c.origin}</p>
+                  <p className="mb-2 truncate text-xs text-slate-500">
+                    {c.origin}
+                    {typeof c.rawScore === "number" ? (
+                      <span className="ml-1.5 font-mono text-[10px] text-slate-600">
+                        bruto {Math.round(c.rawScore)}
+                      </span>
+                    ) : null}
+                  </p>
                   <p className="line-clamp-3 text-sm leading-snug text-slate-300">
                     {c.reason}
                   </p>

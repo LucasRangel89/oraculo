@@ -11,6 +11,7 @@ import type {
   ArtworkResponse,
   CatalogResponse,
   CompareRequest,
+  EngineStatus,
   ComparisonResult,
   FeedbackRequest,
 } from "@/lib/oracle-types";
@@ -228,4 +229,13 @@ export function relativeTime(iso: string): string {
   if (months < 12) return `há ${months} ${months === 1 ? "mês" : "meses"}`;
   const years = Math.floor(months / 12);
   return `há ${years} ${years === 1 ? "ano" : "anos"}`;
+}
+
+
+// ---------------------------------------------------------------------------
+// GET /api/status — motor ativo, armazenamento e tamanho do acervo
+// ---------------------------------------------------------------------------
+
+export async function fetchEngineStatus(): Promise<EngineStatus> {
+  return fetchJSON<EngineStatus>("/api/status", { cache: "no-store" });
 }

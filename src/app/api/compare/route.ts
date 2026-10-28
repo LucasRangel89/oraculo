@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { buildLocalComparison } from "@/lib/local-analysis";
+import { isLocalMode } from "@/lib/llm";
 import { callLLMJson } from "@/lib/oracle-agents";
 import { listSimilarity, normalizeText } from "@/lib/similarity";
 import type { CompareRequest, ComparisonResult } from "@/lib/oracle-types";
@@ -115,6 +117,18 @@ export async function POST(req: NextRequest) {
       aMotifs: Array.isArray(body.aMotifs) ? body.aMotifs.filter((m): m is string => typeof m === "string") : [],
       bMotifs: Array.isArray(body.bMotifs) ? body.bMotifs.filter((m): m is string => typeof m === "string") : [],
     };
+
+    // Sem LLM: o motor local compara fingerprints do catálogo curado.
+    if (isLocalMode()) {
+      return NextResponse.json(
+        buildLocalComparison(
+          request.aName,
+          request.aOrigin,
+          request.bName,
+          request.bOrigin
+        )
+      );
+    }
 
     try {
       const user = [

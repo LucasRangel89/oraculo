@@ -142,6 +142,22 @@ export function listSimilarity(a: string[], b: string[]): number {
   return total === 0 ? 0 : sum / (2 * total);
 }
 
+/**
+ * Correção monotônica do score bruto para leitura humana.
+ *
+ * `listSimilarity` é conservadora por construção (normaliza pelo maior
+ * conjunto e exige sobreposição de vocabulário), então narrativas claramente
+ * aparentadas tendem a cair na faixa 10–35. A curva `x^0.6` preserva
+ * integralmente a ordem (não inventa ranking), apenas redistribui a escala
+ * para a faixa 25–95. O valor bruto continua exposto no breakdown e em
+ * `rawScore`; não é uma probabilidade.
+ */
+export function calibrateScore(raw: number): number {
+  const clamped = Math.min(100, Math.max(0, raw));
+  if (clamped === 0) return 0;
+  return round2(Math.min(99, Math.max(5, 100 * Math.pow(clamped / 100, 0.6))));
+}
+
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
@@ -163,13 +179,22 @@ interface Dimension {
  */
 export function scorePair(
   fp: Fingerprint,
-  other: Fingerprint
+  other: Fingerprint,
+  weights: Partial<Record<keyof ScoreBreakdown, number>> = SIMILARITY_WEIGHTS
 ): { score: number; breakdown: ScoreBreakdown } {
   const dims: Record<keyof ScoreBreakdown, Dimension> = {
-    motifs: { weight: SIMILARITY_WEIGHTS.motifs, a: fp.motifs, b: other.motifs },
-    archetypes: { weight: SIMILARITY_WEIGHTS.archetypes, a: fp.archetypes, b: other.archetypes },
-    themes: { weight: SIMILARITY_WEIGHTS.themes, a: fp.themes, b: other.themes },
-    structure: { weight: SIMILARITY_WEIGHTS.structure, a: fp.beats, b: other.beats },
+    motifs: { weight: weights.motifs ?? SIMILARITY_WEIGHTS.motifs, a: fp.motifs, b: other.motifs },
+    archetypes: {
+      weight: weights.archetypes ?? SIMILARITY_WEIGHTS.archetypes,
+      a: fp.archetypes,
+      b: other.archetypes,
+    },
+    themes: { weight: weights.themes ?? SIMILARITY_WEIGHTS.themes, a: fp.themes, b: other.themes },
+    structure: {
+      weight: weights.structure ?? SIMILARITY_WEIGHTS.structure,
+      a: fp.beats,
+      b: other.beats,
+    },
   };
 
   const breakdown: ScoreBreakdown = {
@@ -215,9 +240,13 @@ export interface CandidateMatch {
  * Recupera os melhores candidatos do catálogo para um fingerprint dado.
  * Ordena por score desc, descarta score <= 0, retorna top n (default 8).
  */
-export function retrieveCandidates(fp: Fingerprint, n = 8): CandidateMatch[] {
+export function retrieveCandidates(
+  fp: Fingerprint,
+  n = 8,
+  weights?: Partial<Record<keyof ScoreBreakdown, number>>
+): CandidateMatch[] {
   const matches: CandidateMatch[] = CATALOG.map((entry) => {
-    const { score, breakdown } = scorePair(fp, catalogEntryToFingerprint(entry));
+    const { score, breakdown } = scorePair(fp, catalogEntryToFingerprint(entry), weights);
     return { entry, score, breakdown };
   })
     .filter((m) => m.score > 0)

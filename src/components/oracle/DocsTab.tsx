@@ -10,6 +10,7 @@ import {
   Fingerprint,
   Image as ImageIcon,
   KeyRound,
+  Landmark,
   Layers,
   Lightbulb,
   Map as MapIcon,
@@ -32,6 +33,7 @@ const AGENT_ROLES: Record<AgentId, string> = {
   symbols: "Extrai símbolos e motivos com significado local e universal, além de paralelos históricos.",
   themes: "Levanta temas universais, questões existenciais e dilemas éticos da narrativa.",
   psychoanalysis: "Produz leituras freudiana e junguiana — complexos, desejos inconscientes — sempre marcadas como especulativas.",
+  cultural: "“O Historiador Social”: situa a obra no tempo, nas tradições e nos valores da época — influências, tensões e recepção.",
   parallels: "Compara a narrativa contra o catálogo curado: scores por critério, convergências, diferenças e categorias.",
 };
 
@@ -42,6 +44,7 @@ const AGENT_ICONS: Record<AgentId, typeof Search> = {
   symbols: KeyRound,
   themes: Compass,
   psychoanalysis: Brain,
+  cultural: Landmark,
   parallels: Network,
 };
 
@@ -161,7 +164,7 @@ export function DocsTab() {
           </div>
           <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-3.5 sm:col-span-2">
             <p className="mb-2 font-semibold text-indigo-200">
-              Os 7 agentes especialistas
+              As 8 lentes especialistas
             </p>
             <ul className="space-y-1.5">
               {(Object.keys(AGENT_LABELS) as AgentId[]).map((id) => {
@@ -215,11 +218,13 @@ export function DocsTab() {
           <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-3.5">
             <p className="mb-1 flex items-center gap-1.5 font-semibold text-indigo-200">
               <Database className="size-4" aria-hidden="true" />
-              Cache Prisma
+              Persistência plugável
             </p>
             <p className="text-xs leading-relaxed text-slate-400">
-              Análises idênticas são servidas do cache (SQLite via Prisma),
-              marcadas como “do cache”, com feedback do usuário persistido.
+              Análises idênticas são servidas do cache, marcadas como “do
+              cache”, com feedback persistido. O adaptador usa Prisma/SQLite
+              quando disponível e cai para arquivo JSON local quando não há
+              banco — o produto não quebra em ambientes de demonstração.
             </p>
           </div>
           <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-3.5">
@@ -265,9 +270,10 @@ export function DocsTab() {
           <li className="flex gap-2.5">
             <Waypoints className="mt-0.5 size-4 shrink-0 text-indigo-400/80" aria-hidden="true" />
             <span>
-              <strong className="text-slate-200">Score transparente</strong> —
+              <strong className="text-slate-200">Score transparente e ajustável</strong> —
               cada conexão exibe o breakdown por critério (motivos, arquétipos,
-              temas, estrutura) e a confiança de cada agente.
+              temas, estrutura), e o usuário pode reponderar os critérios e ver o
+              grafo se reorganizar em tempo real.
             </span>
           </li>
           <li className="flex gap-2.5">
@@ -284,6 +290,29 @@ export function DocsTab() {
       {/* 4. Inovação */}
       <Section icon={Lightbulb} title="4. O que há de novo aqui">
         <ul className="space-y-3">
+          <li className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+            <p className="mb-1 font-semibold text-amber-200">
+              Dois motores, uma gramática
+            </p>
+            <p className="text-xs leading-relaxed text-slate-400">
+              Com chave de LLM, oito agentes generativos analisam a obra. Sem
+              chave, um motor hermenêutico determinístico produz o mesmo
+              contrato a partir do catálogo curado e dos dossiês de referência —
+              sem alucinação e sem custo. O selo no topo do resultado diz sempre
+              qual motor respondeu.
+            </p>
+          </li>
+          <li className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+            <p className="mb-1 font-semibold text-amber-200">
+              Acervo rastreável
+            </p>
+            <p className="text-xs leading-relaxed text-slate-400">
+              A aba <strong className="text-slate-200">Acervo</strong> converte a
+              documentação legada em memória viva do produto: dossiês de
+              referência, biblioteca de prompts exportável, coleções temáticas e
+              a matriz que liga cada capacidade ao documento que a originou.
+            </p>
+          </li>
           <li className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
             <p className="mb-1 font-semibold text-amber-200">
               Fingerprint narrativo
@@ -399,6 +428,60 @@ export function DocsTab() {
             </span>
           </li>
         </ul>
+      </Section>
+
+      {/* 7. Operação */}
+      <Section icon={Database} title="7. Operação: motores, dados e deploy">
+        <p>
+          O Oráculo foi desenhado para <strong className="text-slate-100">não
+          quebrar</strong> quando falta infraestrutura. Duas decisões garantem
+          isso: um motor local determinístico e uma camada de persistência
+          plugável.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              Motor
+            </p>
+            <p className="text-xs leading-relaxed text-slate-400">
+              <code className="text-amber-200/90">ORACLE_LLM_PROVIDER</code>{" "}
+              (<code>zai</code>, <code>openai</code> ou <code>local</code>) ou,
+              na ausência dele, auto-detecção: <code>.z-ai-config</code> → z.ai;{" "}
+              <code>ORACLE_LLM_BASE_URL</code> + <code>ORACLE_LLM_API_KEY</code> →
+              qualquer endpoint compatível com Chat Completions; nada → motor
+              local.
+            </p>
+          </div>
+          <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              Persistência
+            </p>
+            <p className="text-xs leading-relaxed text-slate-400">
+              <code className="text-amber-200/90">ORACULO_STORE</code>{" "}
+              (<code>prisma</code> ou <code>file</code>). O adaptador Prisma usa{" "}
+              <code>DATABASE_URL</code>; o de arquivo grava em{" "}
+              <code>ORACULO_DATA_DIR</code> (padrão <code>.data/</code>). Se o
+              banco não estiver disponível, o app cai no arquivo automaticamente
+              — o cache e o histórico continuam funcionando.
+            </p>
+          </div>
+        </div>
+        <p className="text-xs leading-relaxed text-slate-400">
+          <strong className="text-slate-200">Diagnóstico ao vivo:</strong>{" "}
+          <code className="text-amber-200/90">GET /api/status</code> devolve o
+          motor ativo, o modelo, o adaptador de armazenamento e as estatísticas do
+          catálogo — é o primeiro lugar a olhar depois de qualquer deploy.
+        </p>
+        <p className="text-xs leading-relaxed text-slate-400">
+          <strong className="text-slate-200">Deploy:</strong> build standalone
+          (<code>npm run build</code> + <code>node .next/standalone/server.js</code>),
+          Docker multi-stage ou qualquer plataforma Node. Em ambientes
+          serverless, o sistema de arquivos é efêmero: use{" "}
+          <code>ORACULO_STORE=prisma</code> com banco externo para histórico
+          durável. O guia completo está em{" "}
+          <code className="text-amber-200/90">docs/DEPLOY.md</code> e a bateria de
+          validação em <code className="text-amber-200/90">npm run smoke</code>.
+        </p>
       </Section>
 
       <p className="flex items-center justify-center gap-2 py-6 text-center text-xs text-slate-600">

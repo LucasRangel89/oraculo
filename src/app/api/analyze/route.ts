@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { buildLocalAnalysis } from "@/lib/local-analysis";
+import { isLocalMode, resolveLLMProvider } from "@/lib/llm";
+import { getRepository } from "@/lib/persistence";
 import {
   FACTS_AGENT_CONFIDENCE,
   NarrativeNotFoundError,
@@ -7,6 +9,7 @@ import {
   buildDeterministicParallels,
   buildExecutiveSummary,
   runArchetypesAgent,
+  runCulturalAgent,
   runFactsAgent,
   runParallelsAgent,
   runPsychoanalysisAgent,
@@ -25,6 +28,7 @@ import {
   type AnalyzeStreamEvent,
   type ArchetypeAnalysis,
   type Connection,
+  type CulturalAnalysis,
   type NarrativeFacts,
   type PsychoanalysisData,
   type StructureAnalysis,
@@ -97,9 +101,101 @@ export async function POST(req: NextRequest) {
 
       try {
         // ------------------------------------------------------------------
+        // 0. Motor local (sem LLM configurado)
+        // ------------------------------------------------------------------
+        if (isLocalMode()) {
+          const provider = resolveLLMProvider();
+          const repo = await getRepository();
+
+          send({
+            type: "start",
+            agents: agentIds.map((id) => ({
+              id,
+              label: AGENT_LABELS[id],
+              status: "pending" as AgentRunStatus,
+            })),
+          });
+
+          const cached = await repo.findByNormalizedInput(normalizedInput);
+          if (cached) {
+            send({
+              type: "start",
+              agents: agentIds.map((id) => ({
+                id,
+                label: AGENT_LABELS[id],
+                status: "done" as AgentRunStatus,
+              })),
+            });
+            send({
+              type: "complete",
+              result: { ...analysisResultFromRecord(cached), input, cached: true },
+            });
+            finish();
+            return;
+          }
+
+          let draft: AnalysisResult;
+          try {
+            draft = buildLocalAnalysis({
+              input,
+              depth,
+              id: "pending",
+              createdAt: new Date().toISOString(),
+            });
+          } catch (err) {
+            const message =
+              err instanceof Error ? err.message : "Narrativa não reconhecida pelo motor local.";
+            send({ type: "agent_failed", id: "facts", error: message });
+            send({ type: "error", message });
+            finish();
+            return;
+          }
+
+          // progresso pedagogicamente distribuído: mostra cada lente concluindo
+          for (const id of agentIds) {
+            send({ type: "agent_start", id });
+            await new Promise((r) => setTimeout(r, 140));
+            const hasValue =
+              id === "facts"
+                ? true
+                : id === "parallels"
+                  ? draft.parallels.length > 0
+                  : Boolean(draft[
+                      id as "structure" | "archetypes" | "symbols" | "themes" | "psychoanalysis" | "cultural"
+                    ]);
+            if (hasValue) send({ type: "agent_done", id });
+            else send({ type: "agent_failed", id, error: "Lente não executada nesta profundidade." });
+          }
+
+          console.info(
+            `[oráculo] análise local (${provider.model}) · fonte=${draft.source} · ${input}`
+          );
+
+          const saved = await repo.save({
+            input,
+            normalizedInput,
+            payload: JSON.stringify(draft),
+            confidence: draft.confidence,
+          });
+
+          const result: AnalysisResult = {
+            ...draft,
+            id: saved.id,
+            createdAt: saved.createdAt.toISOString(),
+          };
+          // persiste o payload final (com id/createdAt) para leitura futura
+          await repo.updatePayload(saved.id, JSON.stringify(result));
+
+          send({ type: "complete", result });
+          finish();
+          return;
+        }
+
+        // ------------------------------------------------------------------
         // 1. Cache
         // ------------------------------------------------------------------
-        const cachedRecord = await db.analysis.findUnique({ where: { normalizedInput } });
+        const repo = await getRepository();
+        const cachedRecord = await repo.findByNormalizedInput(normalizedInput);
 
         if (cachedRecord) {
           const result = analysisResultFromRecord(cachedRecord);
@@ -169,6 +265,8 @@ export async function POST(req: NextRequest) {
           psychoanalysis: null,
         };
 
+        let cultural: CulturalAnalysis | null = null;
+
         const runMiddleAgent = async (id: AgentId, staggerMs = 0): Promise<void> => {
           send({ type: "agent_start", id });
           // stagger leve para reduzir rajadas de rate-limit na API do LLM
@@ -192,6 +290,9 @@ export async function POST(req: NextRequest) {
             } else if (id === "psychoanalysis") {
               outputs.psychoanalysis = await runPsychoanalysisAgent(input, facts);
               result = outputs.psychoanalysis;
+            } else if (id === "cultural") {
+              cultural = await runCulturalAgent(input, facts);
+              result = cultural;
             } else {
               return;
             }
@@ -271,24 +372,23 @@ export async function POST(req: NextRequest) {
           symbols: outputs.symbols,
           themes: outputs.themes,
           psychoanalysis: outputs.psychoanalysis,
+          cultural,
           parallels,
           fingerprint,
           confidence: globalConfidence,
           summary,
+          engine: "llm" as const,
+          source: "llm" as const,
         };
 
         // ------------------------------------------------------------------
         // 7. Persistência + complete
         // ------------------------------------------------------------------
-        const record = await db.analysis.upsert({
-          where: { normalizedInput },
-          update: { input, confidence: globalConfidence },
-          create: {
-            input,
-            normalizedInput,
-            payload: JSON.stringify(coreResult),
-            confidence: globalConfidence,
-          },
+        const record = await repo.save({
+          input,
+          normalizedInput,
+          payload: JSON.stringify(coreResult),
+          confidence: globalConfidence,
         });
 
         const result: AnalysisResult = {
@@ -300,19 +400,19 @@ export async function POST(req: NextRequest) {
           symbols: outputs.symbols,
           themes: outputs.themes,
           psychoanalysis: outputs.psychoanalysis,
+          cultural,
           parallels,
           fingerprint,
           confidence: globalConfidence,
           summary,
           cached: false,
+          engine: "llm",
+          source: "llm",
           createdAt: record.createdAt.toISOString(),
         };
 
         // guarda o payload completo (com id/cached/createdAt) para leitura futura
-        await db.analysis.update({
-          where: { id: record.id },
-          data: { payload: JSON.stringify(result) },
-        });
+        await repo.updatePayload(record.id, JSON.stringify(result));
 
         send({ type: "complete", result });
         finish();
