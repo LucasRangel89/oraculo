@@ -29,7 +29,7 @@ function StatusIcon({ status }: { status: "pending" | "running" | "done" | "fail
     case "failed":
       return <XCircle className="size-5 text-red-400" aria-hidden="true" />;
     default:
-      return <CircleDashed className="size-5 text-slate-600" aria-hidden="true" />;
+      return <CircleDashed className="size-5 text-slate-400" aria-hidden="true" />;
   }
 }
 
@@ -51,6 +51,15 @@ export function ProgressScreen() {
               Analisando: “{input}”
             </h1>
           </div>
+          {/* Leitores de tela recebem o estado resumido; a lista abaixo muda
+              rápido demais para ser anunciada linha a linha. */}
+          <p className="sr-only" role="status" aria-live="polite">
+            {running > 0
+              ? `${running} ${running === 1 ? "lente em execução" : "lentes em execução"}. ${progress}% concluído.`
+              : progress >= 100
+                ? "Análise concluída. Abrindo os resultados."
+                : `Preparando as lentes. ${progress}% concluído.`}
+          </p>
           <div className="mb-6">
             <Badge
               variant="outline"
@@ -64,7 +73,11 @@ export function ProgressScreen() {
             </Badge>
           </div>
 
-          <ul className="mb-6 space-y-1" aria-label="Agentes em execução">
+          <ul
+            className="mb-6 space-y-1"
+            aria-label="Lentes da análise"
+            aria-busy={running > 0}
+          >
             {agentStatuses.map((agent) => (
               <li
                 key={agent.id}
@@ -91,7 +104,7 @@ export function ProgressScreen() {
                   >
                     {agent.label || AGENT_LABELS[agent.id]}
                   </p>
-                  <p className="truncate text-xs text-slate-500">
+                  <p className="truncate text-xs text-slate-400">
                     {AGENT_MICROS[agent.id]}
                   </p>
                 </div>
@@ -101,7 +114,7 @@ export function ProgressScreen() {
 
           <div className="space-y-2">
             <div className="flex items-baseline justify-between">
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-slate-400" aria-live="polite">
                 {running > 0
                   ? "O Oráculo está consultando as lentes..."
                   : progress >= 100

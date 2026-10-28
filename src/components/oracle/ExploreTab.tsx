@@ -131,7 +131,7 @@ export function ExploreTab() {
       <div className="mb-4 flex flex-col gap-2.5 md:flex-row md:items-center">
         <div className="relative flex-1">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500"
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
             aria-hidden="true"
           />
           <label htmlFor="catalog-search" className="sr-only">
@@ -142,14 +142,14 @@ export function ExploreTab() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Buscar por nome, origem, motivo ou tema..."
-            className="h-10 border-slate-700 bg-slate-950/60 pl-9 pr-9 text-slate-200 placeholder:text-slate-600 focus-visible:border-indigo-400/70"
+            className="h-10 border-slate-700 bg-slate-950/60 pl-9 pr-9 text-slate-200 placeholder:text-slate-400 focus-visible:border-indigo-400/70"
           />
           {q ? (
             <button
               type="button"
               onClick={() => setQ("")}
               aria-label="Limpar busca"
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-1 text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-200"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
             >
               <X className="size-3.5" aria-hidden="true" />
             </button>
@@ -176,7 +176,7 @@ export function ExploreTab() {
               className="w-full border-slate-700 bg-slate-950/60 text-slate-300 md:w-[220px]"
               aria-label="Filtrar por tradição"
             >
-              <Globe2 className="mr-1.5 size-3.5 shrink-0 text-slate-500" aria-hidden="true" />
+              <Globe2 className="mr-1.5 size-3.5 shrink-0 text-slate-400" aria-hidden="true" />
               <SelectValue placeholder="Tradição" />
             </SelectTrigger>
             <SelectContent className="max-h-[320px] border-slate-800 bg-slate-900">
@@ -194,7 +194,7 @@ export function ExploreTab() {
       </div>
 
       {/* Estado dos filtros — linha única, sem sobrepor o grid */}
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/70 pb-3 text-xs text-slate-500">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/70 pb-3 text-xs text-slate-400">
         <span aria-live="polite">
           <span className="font-mono text-slate-300">{filtered.length}</span> de{" "}
           <span className="font-mono text-slate-300">{catalog.length}</span> narrativas
@@ -232,7 +232,7 @@ export function ExploreTab() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-800 py-16 text-center">
-          <SearchX className="size-8 text-slate-600" aria-hidden="true" />
+          <SearchX className="size-8 text-slate-400" aria-hidden="true" />
           <p className="max-w-sm text-sm text-slate-400">
             Nenhuma narrativa encontrada com esses filtros. Tente uma tradição mais ampla ou limpe a
             busca.
@@ -279,15 +279,20 @@ export function ExploreTab() {
                   </p>
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {entry.motifs.slice(0, 4).map((motif) => (
-                      <Badge
+                      <button
                         key={motif}
-                        variant="secondary"
-                        className="cursor-pointer bg-slate-800/70 px-2 py-0 font-mono text-[10px] font-normal text-slate-400 transition-colors hover:bg-indigo-500/20 hover:text-indigo-200"
+                        type="button"
                         onClick={() => setQ(motif)}
                         title={`Filtrar por ${motif}`}
+                        className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70"
                       >
-                        {motif}
-                      </Badge>
+                        <Badge
+                          variant="secondary"
+                          className="cursor-pointer bg-slate-800/70 px-2 py-0 font-mono text-[10px] font-normal text-slate-300 transition-colors hover:bg-indigo-500/20 hover:text-indigo-200"
+                        >
+                          {motif}
+                        </Badge>
+                      </button>
                     ))}
                   </div>
                   <Button
@@ -321,7 +326,7 @@ export function ExploreTab() {
         </>
       )}
 
-      <footer className="mt-8 flex flex-wrap items-center justify-center gap-2 border-t border-slate-800/60 pt-5 text-center text-xs text-slate-500">
+      <footer className="mt-8 flex flex-wrap items-center justify-center gap-2 border-t border-slate-800/60 pt-5 text-center text-xs text-slate-400">
         <Library className="size-3.5 text-indigo-400/60" aria-hidden="true" />
         <span>
           {filtered.length} de {catalog.length} narrativas curadas — {origins.length} tradições,

@@ -297,6 +297,7 @@ npm run build       # build standalone (copia static + public)
 npm start           # sobe em 0.0.0.0:3000
 npm run smoke       # 10 grupos de teste contra ORACLE_URL (default localhost:3000)
 npm run audit:catalog # integridade do acervo (ids, vocabulário, cobertura)
+npm run audit:a11y  # acessibilidade estática (contraste, teclado, nome acessível)
 ```
 
 Guia completo (Docker, systemd, Vercel/serverless, volumes, checklist de pós-deploy e custos) em **[docs/DEPLOY.md](docs/DEPLOY.md)**. Para inspecionar o motor ativo a qualquer momento:
@@ -336,6 +337,28 @@ A escolha acontece em tempo de build: `oracle-client.ts` detecta `NEXT_PUBLIC_OR
 **Limitações honestas da edição estática.** O histórico fica no navegador (não sincroniza entre dispositivos); não há análise generativa por LLM; e cada visitante baixa o catálogo curado junto com a página (~1,2 MB de JS). Em troca, não há servidor, custo por análise, latência de rede nem chave de API exposta.
 
 ---
+
+## ♿ Acessibilidade
+
+Alvo declarado: **WCAG 2.2 nível AA** nas telas principais. O que já está no código:
+
+- **Pular para o conteúdo** como primeiro elemento focável; `<main>` recebe o foco a
+  cada troca de aba/etapa, e a rolagem volta ao topo (WCAG 2.4.1 / 2.4.3).
+- **Teclado em tudo**: `role="radiogroup"` da profundidade segue o padrão APG
+  (setas + Home/End, uma parada de tabulação); os nós do grafo são focáveis,
+  abrem a comparação com Enter/Espaço e o tooltip aparece no foco.
+- **Contraste**: texto comum usa no mínimo `slate-400` (7,7:1 sobre `#070b14`).
+  `slate-500` (4,1:1) só em ícones decorativos; placeholders também em `slate-400`.
+- **Estados assíncronos anunciados**: `role="status"` para o progresso,
+  `role="alert"` para erro de rede (toast + banner dispensável).
+- **Movimento**: `prefers-reduced-motion` desliga as animações decorativas.
+- **Semântica**: `<button>` para ação (nunca `div`/`span` clicável), conteúdo de
+  botão só com elementos de frase, SVG interativo com `role="group"` + rótulos.
+
+`npm run audit:a11y` (também no workflow de deploy) varre `src/app` e
+`src/components` por regressões objetivas. Ele **não substitui** teste com
+navegador + leitor de tela, que não roda no ambiente de desenvolvimento atual —
+ver a seção de limitações em `docs/DEPLOY.md`.
 
 ## 🗺️ Roadmap
 

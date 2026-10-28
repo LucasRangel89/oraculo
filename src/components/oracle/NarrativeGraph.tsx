@@ -9,7 +9,7 @@
  * snapshot imutável é publicado no state para a renderização.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ImageDown, Share2 } from "lucide-react";
+import { ImageDown, Maximize2, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -344,6 +344,46 @@ export function NarrativeGraph({ result, onSelect }: NarrativeGraphProps) {
     setTooltip(null);
   };
 
+  /** Enter/Espaço num nó equivalem ao clique (abre a comparação). */
+  const handleNodeKeyDown = (
+    e: React.KeyboardEvent<SVGGElement>,
+    node: GraphNodeData
+  ) => {
+    if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+    e.preventDefault();
+    if (node.isCenter) return;
+    onSelect(node.name, node.origin);
+  };
+
+  /** Mostra o tooltip a partir do nó focado (o mouse pode não existir). */
+  const showTooltipForNode = (node: GraphNodeData, el: SVGGElement) => {
+    const container = containerRef.current;
+    if (!container) return;
+    const cRect = container.getBoundingClientRect();
+    const nRect = el.getBoundingClientRect();
+    const TOOLTIP_W = 250;
+    const TOOLTIP_H = 104;
+    const localX = nRect.left - cRect.left + nRect.width / 2;
+    const localY = nRect.top - cRect.top + nRect.height / 2;
+    const x =
+      localX + 14 + TOOLTIP_W > cRect.width - 8
+        ? Math.max(localX - TOOLTIP_W - 14, 8)
+        : Math.max(localX + 14, 8);
+    const y =
+      localY + 14 + TOOLTIP_H > cRect.height - 8
+        ? Math.max(localY - TOOLTIP_H - 14, 8)
+        : Math.max(localY + 14, 8);
+    setTooltip({ node, x, y });
+  };
+
+  /** Devolve o grafo ao enquadramento inicial (pan/zoom podem "perder" o conteúdo). */
+  const handleResetView = () => {
+    viewRef.current = { tx: 0, ty: 0, zoom: 1 };
+    setTooltip(null);
+    publish();
+    startSim(true);
+  };
+
   const handlePointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
     const drag = dragRef.current;
     if (!drag) {
@@ -486,6 +526,17 @@ export function NarrativeGraph({ result, onSelect }: NarrativeGraphProps) {
           <Button
             variant="outline"
             size="sm"
+            onClick={handleResetView}
+            aria-label="Recentralizar o grafo"
+            title="Recentralizar o grafo"
+            className="border-slate-700 bg-slate-950/40 text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+          >
+            <Maximize2 className="size-4" aria-hidden="true" />
+            <span className="hidden sm:inline">Recentralizar</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleExportPng}
             className="border-slate-700 bg-slate-950/40 text-slate-300 hover:bg-slate-800 hover:text-slate-100"
           >
@@ -504,8 +555,8 @@ export function NarrativeGraph({ result, onSelect }: NarrativeGraphProps) {
             viewBox={`0 0 ${VB_W} ${VB_H}`}
             className="h-full w-full cursor-grab active:cursor-grabbing"
             style={{ touchAction: "none" }}
-            role="img"
-            aria-label={`Grafo de conexões de ${result.facts.name} com ${result.parallels.length} paralelos`}
+            role="group"
+            aria-label={`Grafo de conexões de ${result.facts.name} com ${result.parallels.length} paralelos. Use Tab para percorrer os nós e Enter para comparar.`}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
@@ -546,8 +597,21 @@ export function NarrativeGraph({ result, onSelect }: NarrativeGraphProps) {
                     <g
                       key={`node-${n.id}`}
                       data-node-id={n.id}
-                      className={n.isCenter ? undefined : "cursor-pointer"}
+                      className={
+                        n.isCenter ? "oracle-node" : "oracle-node cursor-pointer"
+                      }
+                      role={n.isCenter ? "img" : "button"}
+                      tabIndex={0}
+                      aria-label={
+                        n.isCenter
+                          ? `${n.name}, narrativa analisada (${MEDIA_TYPE_LABELS[n.type]}, ${n.origin})`
+                          : `Comparar ${centerNode.name} com ${n.name} — similaridade ${Math.round(n.score)}%, ${MEDIA_TYPE_LABELS[n.type]}, ${n.origin}`
+                      }
+                      onFocus={(e) => showTooltipForNode(n, e.currentTarget)}
+                      onBlur={() => setTooltip(null)}
+                      onKeyDown={(e) => handleNodeKeyDown(e, n)}
                     >
+                      {/* Centro é informativo; paralelos abrem a comparação. */}
                       {n.isCenter ? (
                         <circle
                           cx={n.x}
@@ -613,9 +677,10 @@ export function NarrativeGraph({ result, onSelect }: NarrativeGraphProps) {
             </div>
           ) : null}
         </div>
-        <p className="mt-2 text-center text-[11px] text-slate-400 md:text-left">
+        <p className="mt-2 text-center text-[11px] leading-relaxed text-slate-400 md:text-left">
           Arraste para reposicionar · Scroll para zoom · Clique num nó para
-          comparação profunda
+          comparação profunda · <span className="text-slate-300">Tab</span> percorre
+          os nós e <span className="text-slate-300">Enter</span> compara
         </p>
       </CardContent>
     </Card>

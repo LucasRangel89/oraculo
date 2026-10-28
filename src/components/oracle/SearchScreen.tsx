@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import {
   ArrowUpRight,
+  CircleAlert,
   Cpu,
   Dices,
   FlaskConical,
@@ -10,6 +11,7 @@ import {
   ScanEye,
   Share2,
   Sparkles,
+  X,
   Zap,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -76,6 +78,8 @@ export function SearchScreen() {
   const catalog = useOracleStore((s) => s.catalog);
   const loadCatalog = useOracleStore((s) => s.loadCatalog);
   const hasResult = useOracleStore((s) => s.result !== null);
+  const error = useOracleStore((s) => s.error);
+  const clearError = useOracleStore((s) => s.clearError);
   const [engine, setEngine] = useState<EngineStatus | null>(null);
 
   // Chips de sugestão vêm do catálogo curado (fallback estático)
@@ -102,6 +106,35 @@ export function SearchScreen() {
       alive = false;
     };
   }, [loadRecent, loadCatalog]);
+
+  // Padrão APG de radiogroup: só a opção marcada entra na ordem de tabulação;
+  // setas percorrem e já selecionam, Home/End vão aos extremos.
+  const handleDepthKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const total = DEPTH_OPTIONS.length;
+    let next = index;
+    switch (event.key) {
+      case "ArrowRight":
+      case "ArrowDown":
+        next = (index + 1) % total;
+        break;
+      case "ArrowLeft":
+      case "ArrowUp":
+        next = (index - 1 + total) % total;
+        break;
+      case "Home":
+        next = 0;
+        break;
+      case "End":
+        next = total - 1;
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
+    setDepth(DEPTH_OPTIONS[next].id);
+    const radios = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="radio"]');
+    radios?.[next]?.focus();
+  };
 
   const canAnalyze = input.trim().length >= 2;
 
@@ -135,6 +168,36 @@ export function SearchScreen() {
         </p>
       </section>
 
+      {/* Erro da última tentativa: persiste até ser dispensado, em vez de
+          depender apenas do toast (que desaparece e não é relido). */}
+      {error ? (
+        <div
+          role="alert"
+          className="mb-4 flex w-full max-w-2xl items-start gap-2.5 rounded-lg border border-red-400/35 bg-red-500/10 px-3.5 py-3"
+        >
+          <CircleAlert
+            className="mt-0.5 size-4 shrink-0 text-red-300"
+            aria-hidden="true"
+          />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-red-200">
+              Não foi possível concluir a análise
+            </p>
+            <p className="mt-0.5 text-xs leading-relaxed text-red-200/85">
+              {error} Seu texto continua no campo abaixo — ajuste e tente de novo.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={clearError}
+            aria-label="Dispensar mensagem de erro"
+            className="rounded p-1 text-red-200/80 transition-colors outline-none hover:bg-red-500/20 hover:text-red-100 focus-visible:ring-2 focus-visible:ring-red-300/70"
+          >
+            <X className="size-4" aria-hidden="true" />
+          </button>
+        </div>
+      ) : null}
+
       {/* Card de busca */}
       <Card className="w-full max-w-2xl border-slate-800 bg-slate-900/60 py-0 shadow-[0_0_60px_-15px_rgba(99,102,241,0.25)]">
         <CardContent className="p-5 md:p-6">
@@ -153,7 +216,7 @@ export function SearchScreen() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={'Ex.: "Perseu", "Matrix", "Fausto"...'}
-              className="h-14 flex-1 border-slate-700 bg-slate-950/60 text-lg text-slate-100 placeholder:text-slate-600 focus-visible:border-indigo-400/70 focus-visible:ring-indigo-400/30"
+              className="h-14 flex-1 border-slate-700 bg-slate-950/60 text-lg text-slate-100 placeholder:text-slate-400 focus-visible:border-indigo-400/70 focus-visible:ring-indigo-400/30"
               autoComplete="off"
             />
             <div className="flex gap-2">
@@ -181,11 +244,11 @@ export function SearchScreen() {
 
           {/* Profundidade */}
           <div className="mt-5">
-            <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-400">
               Profundidade da análise
             </p>
             <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Profundidade da análise">
-              {DEPTH_OPTIONS.map((opt) => {
+              {DEPTH_OPTIONS.map((opt, index) => {
                 const selected = depth === opt.id;
                 const Icon = opt.icon;
                 return (
@@ -194,7 +257,9 @@ export function SearchScreen() {
                     type="button"
                     role="radio"
                     aria-checked={selected}
+                    tabIndex={selected ? 0 : -1}
                     onClick={() => setDepth(opt.id)}
+                    onKeyDown={(event) => handleDepthKeyDown(event, index)}
                     className={`flex items-center gap-3 rounded-lg border p-3 text-left transition-all outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60 ${
                       selected
                         ? "border-indigo-400/60 bg-indigo-500/10 shadow-[inset_0_0_20px_-8px_rgba(99,102,241,0.5)]"
@@ -202,7 +267,7 @@ export function SearchScreen() {
                     }`}
                   >
                     <Icon
-                      className={`size-5 shrink-0 ${selected ? "text-indigo-300" : "text-slate-500"}`}
+                      className={`size-5 shrink-0 ${selected ? "text-indigo-300" : "text-slate-400"}`}
                       aria-hidden="true"
                     />
                     <span className="min-w-0">
@@ -211,7 +276,7 @@ export function SearchScreen() {
                       >
                         {opt.title}
                       </span>
-                      <span className="block truncate text-xs text-slate-500">
+                      <span className="block truncate text-xs text-slate-400">
                         {opt.desc}
                       </span>
                     </span>
@@ -223,7 +288,7 @@ export function SearchScreen() {
 
           {/* Chips de sugestão */}
           <div className="mt-5">
-            <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-400">
               Experimente
             </p>
             <div className="flex flex-wrap gap-2">
@@ -302,7 +367,7 @@ export function SearchScreen() {
       {recent.length > 0 ? (
         <section className="mt-8 w-full max-w-2xl" aria-label="Análises recentes">
           <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-300">
-            <History className="size-4 text-slate-500" aria-hidden="true" />
+            <History className="size-4 text-slate-400" aria-hidden="true" />
             Análises recentes
           </h2>
           <div className="flex flex-wrap gap-2">

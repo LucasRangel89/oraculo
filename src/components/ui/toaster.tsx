@@ -29,7 +29,7 @@ export function Toaster() {
           </Toast>
         )
       })}
-      <ToastViewport />
+      <ToastViewport aria-label="Notificações" />
     </ToastProvider>
   )
 }

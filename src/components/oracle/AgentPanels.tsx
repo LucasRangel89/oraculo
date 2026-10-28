@@ -31,7 +31,7 @@ function ConfidenceBar({ value }: { value: number }) {
   return (
     <div className="mt-4">
       <div className="mb-1 flex items-center justify-between text-xs">
-        <span className="text-slate-500">Confiança do agente</span>
+        <span className="text-slate-400">Confiança do agente</span>
         <span className="font-mono font-semibold text-indigo-300">{pct}%</span>
       </div>
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
@@ -47,11 +47,11 @@ function ConfidenceBar({ value }: { value: number }) {
 function NotRun() {
   return (
     <div className="flex flex-col items-center gap-2 py-12 text-center">
-      <CircleSlash className="size-6 text-slate-600" aria-hidden="true" />
-      <p className="text-sm text-slate-500">
+      <CircleSlash className="size-6 text-slate-400" aria-hidden="true" />
+      <p className="text-sm text-slate-400">
         Agente não executado nesta profundidade.
       </p>
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-slate-400">
         Selecione “Análise completa” na busca para incluir esta lente.
       </p>
     </div>
@@ -249,7 +249,7 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                             ))}
                           </div>
                         ) : (
-                          <p className="text-xs text-slate-500">—</p>
+                          <p className="text-xs text-slate-400">—</p>
                         )}
                       </div>
                     ))}
@@ -316,17 +316,17 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                               />
                             ) : (
                               <Minus
-                                className="mt-0.5 size-3.5 shrink-0 text-slate-600"
+                                className="mt-0.5 size-3.5 shrink-0 text-slate-400"
                                 aria-hidden="true"
                               />
                             )}
                             <div className="min-w-0">
                               <p
-                                className={`text-sm ${stage.present ? "text-slate-200" : "text-slate-500"}`}
+                                className={`text-sm ${stage.present ? "text-slate-200" : "text-slate-400"}`}
                               >
                                 {stage.stage}
                               </p>
-                              <p className="text-xs leading-snug text-slate-500">
+                              <p className="text-xs leading-snug text-slate-400">
                                 {stage.evidence}
                               </p>
                             </div>
