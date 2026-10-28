@@ -282,7 +282,8 @@ O Pages serve **apenas arquivos** — não existe servidor para responder `/api`
 
 ```bash
 npm run build:pages    # export estático em ./out
-npm run verify:pages   # 30 verificações de comportamento + artefato
+npm run verify:pages   # verificações de comportamento + artefato publicado
+npm run preview:pages  # serve ./out em http://localhost:4000/oraculo/
 ```
 
 **Como funciona.** O mesmo código atende os dois alvos:

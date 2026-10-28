@@ -125,8 +125,8 @@ O Pages não executa servidor, então o app publicado usa o **motor local no nav
 
 ```bash
 npm run build:pages     # export em ./out (remove src/app/api do build)
-npm run verify:pages    # 30 checagens: contrato do motor + artefato
-npx serve out           # teste local (abra /oraculo/ se PAGES_BASE_PATH=/oraculo)
+npm run verify:pages    # checagens: contrato do motor + artefato publicado
+npm run preview:pages   # serve ./out no subcaminho real (localhost:4000/oraculo/)
 ```
 
 ### Como o build estático funciona
