@@ -14,7 +14,9 @@
 
 **Uma estação de trabalho analítica que utiliza LLMs para dissecar o monomito e a estrutura narrativa, transformando arquétipos abstratos em dados visuais e insights acionáveis para criadores.**
 
-[Funcionalidades](#-funcionalidades) · [Como funciona](#-como-funciona) · [Dois motores](#-dois-motores-llm-e-local) · [Acervo](#-acervo-legado) · [Arquitetura](#-arquitetura) · [Rodar localmente](#-rodando-localmente) · [Roadmap](#-roadmap) · [Ética](#-ética--limitações)
+**🌐 Ao vivo:** [lucasrangel89.github.io/oraculo](https://lucasrangel89.github.io/oraculo/) · **Edição estática** — o motor roda no seu navegador, sem servidor e sem chave de API.
+
+[Funcionalidades](#-funcionalidades) · [Como funciona](#-como-funciona) · [Dois motores](#-dois-motores-llm-e-local) · [Acervo](#-acervo-legado) · [Arquitetura](#-arquitetura) · [Rodar localmente](#-rodando-localmente) · [GitHub Pages](#-publicação-no-github-pages) · [Roadmap](#-roadmap) · [Ética](#-ética--limitações)
 
 </div>
 
@@ -271,6 +273,34 @@ Guia completo (Docker, systemd, Vercel/serverless, volumes, checklist de pós-de
 curl -s localhost:3000/api/status | jq
 # { "engine": "local", "provider": "Motor local", "store": "file", "catalog": {...} }
 ```
+
+---
+
+## 🌐 Publicação no GitHub Pages
+
+O Pages serve **apenas arquivos** — não existe servidor para responder `/api`. Para que a página publicada seja o produto inteiro (e não uma casca), o Oráculo tem um segundo alvo de build:
+
+```bash
+npm run build:pages    # export estático em ./out
+npm run verify:pages   # 30 verificações de comportamento + artefato
+```
+
+**Como funciona.** O mesmo código atende os dois alvos:
+
+| | servidor (`npm run build`) | estático (`npm run build:pages`) |
+|---|---|---|
+| Rotas `/api` | Sim (SSE, cache, comparação) | Removidas do build |
+| Motor de análise | Node (`local-analysis.ts`) | **Navegador** (`client-engine.ts`) |
+| Persistência | Prisma ou arquivo JSON | `localStorage` do dispositivo |
+| LLM | z.ai · OpenAI-compatível · local | sempre local (determinístico) |
+
+A escolha acontece em tempo de build: `oracle-client.ts` detecta `NEXT_PUBLIC_ORACLE_STATIC=1` e passa a atender cada chamada com o motor do navegador — o contrato de `oracle-types.ts` é idêntico, então nenhum componente muda.
+
+**Deploy automático.** `.github/workflows/deploy-pages.yml` roda a cada push na `main`: instala, checa tipos, gera o export, roda `verify:pages` e publica. O subcaminho (`/oraculo`) é calculado a partir do nome do repositório — repositórios `<user>.github.io` são servidos na raiz.
+
+> **Ativar uma vez:** em *Settings → Pages*, defina **Source = GitHub Actions**. (O workflow também pode ser disparado manualmente em *Actions → Deploy no GitHub Pages → Run workflow*.)
+
+**Limitações honestas da edição estática.** O histórico fica no navegador (não sincroniza entre dispositivos); não há análise generativa por LLM; e cada visitante baixa o catálogo curado junto com a página (~1,2 MB de JS). Em troca, não há servidor, custo por análise, latência de rede nem chave de API exposta.
 
 ---
 

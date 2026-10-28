@@ -1,0 +1,80 @@
+name: Deploy no GitHub Pages
+
+# Publica a edição estática do Oráculo (motor local rodando no navegador).
+# O export é gerado por `npm run build:pages` e verificado por `verify:pages`
+# antes de subir — um build quebrado não substitui a página no ar.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Uma publicação por vez; não cancela um deploy já em andamento.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build estático
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Dependências
+        run: npm ci --legacy-peer-deps --no-audit --no-fund || npm install --legacy-peer-deps --no-audit --no-fund
+
+      - name: Calcular subcaminho
+        id: base
+        run: |
+          REPO="${{ github.event.repository.name }}"
+          if [[ "$REPO" == *.github.io ]]; then
+            echo "path=" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=/$REPO" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checar tipos
+        run: npm run typecheck
+
+      - name: Build estático
+        env:
+          PAGES_BASE_PATH: ${{ steps.base.outputs.path }}
+        run: npm run build:pages
+
+      - name: Verificar artefato
+        env:
+          PAGES_BASE_PATH: ${{ steps.base.outputs.path }}
+        run: npm run verify:pages
+
+      - name: Configurar Pages
+        uses: actions/configure-pages@v5
+
+      - name: Empacotar
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    name: Publicar
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,6 +1,15 @@
 /**
- * Clientes de API do Oráculo — somente chamadas RELATIVAS ("/api/...").
- * O backend (Task 2-a) segue o contrato de src/lib/oracle-types.ts.
+ * Clientes de API do Oráculo.
+ *
+ * Duas implementações, **um único contrato** (`oracle-types.ts`):
+ *
+ * - **servidor** (padrão): chamadas relativas a `/api/...`;
+ * - **estático** (`NEXT_PUBLIC_ORACLE_STATIC=1`, build do GitHub Pages): as
+ *   mesmas funções são atendidas por `client-engine.ts`, que executa o motor
+ *   hermenêutico no navegador e persiste em `localStorage`.
+ *
+ * A escolha é feita em tempo de build (o `NEXT_PUBLIC_*` é inlinado), então o
+ * bundle publicado não carrega nenhuma chamada de rede.
  */
 import type {
   AnalysisDepth,
@@ -15,6 +24,14 @@ import type {
   ComparisonResult,
   FeedbackRequest,
 } from "@/lib/oracle-types";
+
+/** `true` no bundle estático publicado (GitHub Pages). */
+export const IS_STATIC = process.env.NEXT_PUBLIC_ORACLE_STATIC === "1";
+
+/** Carrega o backend de navegador sob demanda (não entra no bundle do servidor). */
+function staticApi() {
+  return import("@/lib/client-engine");
+}
 
 // ---------------------------------------------------------------------------
 // Erro HTTP com mensagem amigável
@@ -65,6 +82,11 @@ export async function streamAnalyze(
   onEvent: (event: AnalyzeStreamEvent) => void,
   signal?: AbortSignal
 ): Promise<void> {
+  if (IS_STATIC) {
+    const { streamAnalyzeStatic } = await staticApi();
+    return streamAnalyzeStatic(input, depth, onEvent, signal);
+  }
+
   const res = await fetch("/api/analyze", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -131,6 +153,10 @@ function handleBlock(block: string, onEvent: (event: AnalyzeStreamEvent) => void
 // ---------------------------------------------------------------------------
 
 export async function fetchRecentAnalyses(): Promise<AnalysisListItem[]> {
+  if (IS_STATIC) {
+    const { fetchRecentAnalysesStatic } = await staticApi();
+    return fetchRecentAnalysesStatic();
+  }
   const data = await fetchJSON<{ items: AnalysisListItem[] }>("/api/analyses");
   return data.items ?? [];
 }
@@ -139,6 +165,10 @@ export async function fetchCatalog(
   q?: string,
   type?: string
 ): Promise<CatalogResponse> {
+  if (IS_STATIC) {
+    const { fetchCatalogStatic } = await staticApi();
+    return fetchCatalogStatic(q, type);
+  }
   const params = new URLSearchParams();
   if (q && q.trim()) params.set("q", q.trim());
   if (type && type !== "todos") params.set("type", type);
@@ -147,10 +177,18 @@ export async function fetchCatalog(
 }
 
 export async function fetchAnalysis(id: string): Promise<AnalysisResult> {
+  if (IS_STATIC) {
+    const { fetchAnalysisStatic } = await staticApi();
+    return fetchAnalysisStatic(id);
+  }
   return fetchJSON<AnalysisResult>(`/api/analysis/${encodeURIComponent(id)}`);
 }
 
 export async function submitFeedback(payload: FeedbackRequest): Promise<void> {
+  if (IS_STATIC) {
+    const { submitFeedbackStatic } = await staticApi();
+    return submitFeedbackStatic(payload);
+  }
   await fetchJSON<{ ok: boolean }>("/api/feedback", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -161,6 +199,10 @@ export async function submitFeedback(payload: FeedbackRequest): Promise<void> {
 export async function requestComparison(
   req: CompareRequest
 ): Promise<ComparisonResult> {
+  if (IS_STATIC) {
+    const { requestComparisonStatic } = await staticApi();
+    return requestComparisonStatic(req);
+  }
   return fetchJSON<ComparisonResult>("/api/compare", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -171,6 +213,10 @@ export async function requestComparison(
 export async function requestArtwork(
   req: ArtworkRequest
 ): Promise<ArtworkResponse> {
+  if (IS_STATIC) {
+    const { requestArtworkStatic } = await staticApi();
+    return requestArtworkStatic(req);
+  }
   return fetchJSON<ArtworkResponse>("/api/artwork", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -237,5 +283,9 @@ export function relativeTime(iso: string): string {
 // ---------------------------------------------------------------------------
 
 export async function fetchEngineStatus(): Promise<EngineStatus> {
+  if (IS_STATIC) {
+    const { fetchEngineStatusStatic } = await staticApi();
+    return fetchEngineStatusStatic();
+  }
   return fetchJSON<EngineStatus>("/api/status", { cache: "no-store" });
 }

@@ -119,7 +119,49 @@ Coloque atrás de um reverse proxy (Caddy/Nginx) com HTTPS. Não há allowlist d
 
 ---
 
-## 6. Custos e limites
+## 6. GitHub Pages (edição estática)
+
+O Pages não executa servidor, então o app publicado usa o **motor local no navegador**: `oracle-client.ts` deixa de chamar `/api` e passa a atender cada operação com `src/lib/client-engine.ts`. Nada muda na interface.
+
+```bash
+npm run build:pages     # export em ./out (remove src/app/api do build)
+npm run verify:pages    # 30 checagens: contrato do motor + artefato
+npx serve out           # teste local (abra /oraculo/ se PAGES_BASE_PATH=/oraculo)
+```
+
+### Como o build estático funciona
+
+1. `scripts/build-pages.mjs` move `src/app/api` para `.pages-stash/` (o `output: "export"` recusa route handlers com POST/streaming);
+2. roda `next build` com `STATIC_EXPORT=1` e `NEXT_PUBLIC_ORACLE_STATIC=1`;
+3. restaura a pasta da API **sempre**, inclusive em caso de falha;
+4. grava `out/.nojekyll` para o Jekyll não descartar `_next/`;
+5. `PAGES_BASE_PATH` define o subcaminho (`/oraculo` para project pages, vazio para `<user>.github.io`).
+
+### Publicação automática
+
+`.github/workflows/deploy-pages.yml` dispara em push para `main` (ou manualmente):
+
+```
+checkout → node 22 → npm ci → typecheck → build:pages → verify:pages
+        → configure-pages → upload-pages-artifact → deploy-pages
+```
+
+**Passo único manual:** *Settings → Pages → Source = **GitHub Actions***.
+
+### O que muda no modo estático
+
+| | servidor | estático |
+|---|---|---|
+| Análise | rota `/api/analyze` (SSE) | `streamAnalyzeStatic` no navegador |
+| Histórico | Prisma/arquivo | `localStorage` (`oraculo:analyses:v1`) |
+| Arte | modelo de imagem (opcional) | sigilo SVG determinístico |
+| LLM | z.ai/OpenAI/local | sempre local |
+
+Trade-offs: histórico por dispositivo, sem análise generativa e ~1,2 MB de JS no primeiro acesso. Em troca: zero servidor, zero custo por análise, zero chave exposta e nenhuma requisição de rede depois do load.
+
+---
+
+## 7. Custos e limites
 
 - **Modo local:** zero chamadas externas. Uma análise completa é O(n) sobre 24 narrativas — poucos milissegundos.
 - **Modo LLM:** 1 chamada para `facts`, 6 em paralelo (stagger de 350 ms), 1 para `parallels` e 1 para o resumo. O código já trata `429` com backoff (5 s/15 s/30 s) e reduz rajadas.

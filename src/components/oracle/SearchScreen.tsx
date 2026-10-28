@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { fetchEngineStatus, relativeTime } from "@/lib/oracle-client";
+import { fetchEngineStatus, IS_STATIC, relativeTime } from "@/lib/oracle-client";
 import { useOracleStore } from "@/lib/oracle-store";
 import type { AnalysisDepth, EngineStatus } from "@/lib/oracle-types";
 
@@ -259,12 +259,26 @@ export function SearchScreen() {
           <div className="mt-5 flex w-full max-w-2xl items-start gap-2.5 rounded-lg border border-emerald-400/25 bg-emerald-400/5 px-3.5 py-2.5">
             <FlaskConical className="mt-0.5 size-4 shrink-0 text-emerald-400" aria-hidden="true" />
             <p className="text-xs leading-relaxed text-emerald-200/90">
-              <strong className="font-semibold">Modo demonstração local</strong> — sem chave de
-              LLM conectada, o Oráculo usa o motor hermenêutico determinístico sobre{" "}
-              {engine.catalog.narratives} narrativas curadas ({engine.catalog.traditions}{" "}
-              tradições). Configure <code className="text-emerald-100">ORACLE_LLM_BASE_URL</code>{" "}
-              e <code className="text-emerald-100">ORACLE_LLM_API_KEY</code> para ativar as oito
-              lentes generativas.
+              <strong className="font-semibold">
+                {IS_STATIC ? "Edição estática — motor local no navegador" : "Modo demonstração local"}
+              </strong>{" "}
+              — {IS_STATIC ? (
+                <>
+                  esta página é servida pelo GitHub Pages: as oito lentes rodam
+                  inteiramente no seu navegador sobre {engine.catalog.narratives} narrativas
+                  curadas ({engine.catalog.traditions} tradições), sem servidor e sem chave de
+                  API. Seu histórico fica salvo apenas neste dispositivo.
+                </>
+              ) : (
+                <>
+                  sem chave de LLM conectada, o Oráculo usa o motor hermenêutico
+                  determinístico sobre {engine.catalog.narratives} narrativas curadas (
+                  {engine.catalog.traditions} tradições). Configure{" "}
+                  <code className="text-emerald-100">ORACLE_LLM_BASE_URL</code> e{" "}
+                  <code className="text-emerald-100">ORACLE_LLM_API_KEY</code> para ativar as oito
+                  lentes generativas.
+                </>
+              )}
             </p>
           </div>
         ) : (
@@ -272,7 +286,13 @@ export function SearchScreen() {
             <Cpu className="size-4 shrink-0 text-indigo-400" aria-hidden="true" />
             <p className="text-xs text-indigo-200/90">
               Agentes generativos ativos · {engine.provider} ({engine.model}) · perspectivas
-              armazenadas via {engine.store === "prisma" ? "Prisma/SQLite" : "arquivo local"}.
+              armazenadas via{" "}
+              {engine.store === "prisma"
+                ? "Prisma/SQLite"
+                : engine.store === "browser"
+                  ? "armazenamento do navegador"
+                  : "arquivo local"}
+              .
             </p>
           </div>
         )
