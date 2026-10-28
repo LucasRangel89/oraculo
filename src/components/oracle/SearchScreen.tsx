@@ -79,13 +79,13 @@ export function SearchScreen() {
   const [engine, setEngine] = useState<EngineStatus | null>(null);
 
   // Chips de sugestão vêm do catálogo curado (fallback estático)
-  const suggestions = useMemo(
-    () =>
-      catalog.length > 0
-        ? catalog.slice(0, 10).map((e) => e.name)
-        : FALLBACK_SUGGESTIONS,
-    [catalog]
-  );
+  // Amostra espalhada pelo acervo: mostra a variedade de tradições em vez de
+  // repetir sempre as dez primeiras entradas.
+  const suggestions = useMemo(() => {
+    if (catalog.length === 0) return FALLBACK_SUGGESTIONS;
+    const step = Math.max(1, Math.floor(catalog.length / 10));
+    return catalog.filter((_, i) => i % step === 0).slice(0, 10).map((e) => e.name);
+  }, [catalog]);
 
   useEffect(() => {
     void loadRecent();
@@ -316,7 +316,7 @@ export function SearchScreen() {
                 <span className="max-w-[180px] truncate font-medium">
                   {item.input}
                 </span>
-                <span className="text-[10px] text-slate-500 group-hover:text-amber-300/70">
+                <span className="text-[10px] text-slate-400 group-hover:text-amber-300/70">
                   {relativeTime(item.createdAt)}
                 </span>
               </button>

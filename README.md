@@ -46,12 +46,38 @@ O **Oráculo** recebe qualquer narrativa — um mito, um filme, um livro, um per
 | 🧮 **Score Transparente** | Fingerprints ponderados + breakdown por critério (motivos 35%, arquétipos 25%, temas 25%, estrutura 15%) **e pesos ajustáveis pelo usuário**, com recálculo do grafo em tempo real |
 | ⚡ **Comparação Profunda** | Modal lado a lado com convergências agrupadas por categoria, diferenças, símbolos compartilhados e narrativa explicativa |
 | 🎨 **Arte-Síntese** | Geração de arte conceitual via IA — com **fallback vetorial determinístico** (sigilo SVG) quando não há provedor de imagem |
-| 🧭 **Explorar Catálogo** | 24 narrativas curadas de 17 tradições (Grega, Nórdica, Egípcia, Mesopotâmica, Hindu, Yorubá/Ashanti, Asteca, Japonesa, Celta + cultura pop) com busca por motivo/arquétipo |
+| 🧭 **Explorar Catálogo** | **140 narrativas de 69 tradições** — Grécia, Roma, Mesopotâmia, Egito, Nórdica, Celta, Eslava, Índia, Pérsia, China, Japão, Coreia, Vietnã, África Ocidental, Maia, Inca, Guarani, folclore brasileiro, Polinésia, povos nativos norte-americanos, literatura e cinema — com busca, filtro por tradição/tipo e paginação |
 | 📚 **Acervo Legado** | Aba nova: dossiês de referência completos, biblioteca de prompts exportável, coleções temáticas e a matriz de rastreabilidade documento → produto |
 | 🧪 **Motor local** | Sem chave de API, o Oráculo funciona com um motor hermenêutico determinístico sobre o catálogo — sem alucinação, sem custo, com selo de proveniência |
 | 💾 **Persistência plugável** | Cache, histórico e feedback via Prisma/SQLite **ou** arquivo JSON — o produto não quebra sem banco |
 | 📤 **Export & Feedback** | JSON completo, **dossiê em Markdown** (renderizável em PDF) e feedback útil/não-útil (human-in-the-loop) |
-| 📱 **Responsivo** | Mobile-first com dashboard de 3 colunas no desktop |
+| 📱 **Responsivo** | Mobile-first; dashboard em duas colunas + lentes em largura total, sem caixas sobrepostas |
+
+---
+
+## 🗺️ O acervo
+
+**140 narrativas · 69 tradições · 185 motivos · 28 arquétipos · 443 temas.**
+
+O catálogo é o combustível das conexões: o motor só encontra pontes entre
+narrativas que existem no acervo. Ele vive em módulos por família de tradições
+(`src/lib/catalog/`), todos presos a um vocabulário controlado de motivos
+(`vocab.ts`) — é isso que faz "Sun Wukong" encontrar Prometeu e Coiote, e
+"Rustam e Sohrab" encontrar Karna e Aquiles.
+
+| Módulo | Cobre |
+|---|---|
+| `nucleo.ts` | as 24 narrativas fundadoras (Grécia, Nórdica, Egito, Hindu, pop) |
+| `greco-romana.ts` | Teseu, Medeia, Antígona, Aquiles, Eneias, Rômulo e Remo... |
+| `nordica.ts` | Sigurd, Beowulf, Balder, Volsungos, Crepúsculo dos Deuses |
+| `oriente-antigo.ts` | Ishtar, Tammuz, Osíris, Hórus e Set, Enuma Elish, Gilgamesh |
+| `asia.ts` | Mahabharata, Ramayana, Shahnameh, Attar, Kojiki, Sun Wukong, Mulan, Chunhyang, Sơn Tinh |
+| `americas-africa.ts` | Popol Vuh, Inca, Guarani, folclore brasileiro, Anansi, Sunjata, orixás, Polinésia, nativos norte-americanos |
+| `europa.ts` | Mabinogion, Artur, eslavo (Baba Yaga, Koschei), ibérico, Machado, Guimarães Rosa, García Márquez |
+| `contemporaneo.ts` | cinema, série, quadrinhos, canção (Blade Runner, Duna, Bacurau, Watchmen, Chico Buarque...) |
+
+Audite o acervo com `npm run audit:catalog` — ele falha se algum motivo sair do
+vocabulário, se houver id duplicado ou se uma entrada tiver sinopse curta demais.
 
 ---
 
@@ -161,7 +187,7 @@ flowchart LR
     end
 
     REPO[(Persistência plugável<br/>Prisma/SQLite · arquivo JSON)]
-    CATALOG[Catálogo curado<br/>24 narrativas · 17 tradições]
+    CATALOG[Catálogo curado<br/>140 narrativas · 69 tradições]
     ART[Arte-síntese<br/>imagem IA · sigilo SVG]
 
     UI -->|POST /api/analyze| ORCH
@@ -208,7 +234,12 @@ src/
     ├── persistence.ts            # Repositório Prisma ou arquivo JSON
     ├── export-markdown.ts        # Dossiê completo em Markdown
     ├── local-artwork.ts          # Sigilo SVG determinístico
-    ├── oracle-catalog.ts         # 24 narrativas curadas
+    ├── oracle-catalog.ts         # acervo curado (140) — agrega catalog/*
+    ├── catalog/                  # módulos por família de tradições + vocabulário
+    │   ├── vocab.ts              # motivos/arquétipos canônicos (auditáveis)
+    │   ├── nucleo.ts             # 24 narrativas fundadoras
+    │   ├── greco-romana.ts · nordica.ts · oriente-antigo.ts
+    │   ├── asia.ts · americas-africa.ts · europa.ts · contemporaneo.ts
     ├── oracle-store.ts           # Estado global (zustand) + pesos
     └── oracle-client.ts          # Clientes de API + parser SSE
 ```
@@ -265,6 +296,7 @@ npm run typecheck   # contrato de tipos
 npm run build       # build standalone (copia static + public)
 npm start           # sobe em 0.0.0.0:3000
 npm run smoke       # 10 grupos de teste contra ORACLE_URL (default localhost:3000)
+npm run audit:catalog # integridade do acervo (ids, vocabulário, cobertura)
 ```
 
 Guia completo (Docker, systemd, Vercel/serverless, volumes, checklist de pós-deploy e custos) em **[docs/DEPLOY.md](docs/DEPLOY.md)**. Para inspecionar o motor ativo a qualquer momento:

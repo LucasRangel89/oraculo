@@ -17,7 +17,6 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -52,7 +51,7 @@ function NotRun() {
       <p className="text-sm text-slate-500">
         Agente não executado nesta profundidade.
       </p>
-      <p className="text-xs text-slate-600">
+      <p className="text-xs text-slate-500">
         Selecione “Análise completa” na busca para incluir esta lente.
       </p>
     </div>
@@ -77,7 +76,7 @@ function ChipGroup({
         : "border-indigo-400/30 bg-indigo-500/10 text-indigo-200";
   return (
     <div>
-      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
         {label}
       </p>
       <div className="flex flex-wrap gap-1.5">
@@ -145,10 +144,10 @@ export function AgentPanels({ result }: AgentPanelsProps) {
   } = result;
 
   return (
-    <Card className="flex h-full flex-col border-slate-800 bg-slate-900/60">
-      <div className="border-b border-slate-800/70 px-4 pt-4 md:px-5">
-        <Tabs defaultValue="resumo" className="gap-3">
-          <div className="overflow-x-auto oracle-scroll pb-1">
+    <Card className="gap-0 border-slate-800 bg-slate-900/60 py-0">
+      <div className="px-4 pt-4 pb-4 md:px-5 md:pt-5">
+        <Tabs defaultValue="resumo" className="gap-0">
+          <div className="overflow-x-auto oracle-scroll border-b border-slate-800/70 pb-3">
             <TabsList className="h-auto min-w-max bg-slate-950/70 p-1">
               <TabsTrigger
                 value="resumo"
@@ -203,11 +202,11 @@ export function AgentPanels({ result }: AgentPanelsProps) {
           </div>
 
           {/* ---------------------------------------------------- Resumo */}
-          <TabsContent value="resumo">
-            <ScrollArea className="h-[520px] pr-2.5 oracle-scroll lg:h-[560px]">
+          <TabsContent value="resumo" className="pt-4">
+            <div className="pr-0.5">
               <div className="space-y-4">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                     Narrativa analisada
                   </p>
                   <p className="mt-1 font-serif text-lg text-slate-100">{facts.name}</p>
@@ -222,7 +221,7 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                 </div>
                 <Separator className="bg-slate-800/70" />
                 <div>
-                  <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                     Fingerprint narrativo — base do score de similaridade
                   </p>
                   <div className="space-y-3">
@@ -250,22 +249,22 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                             ))}
                           </div>
                         ) : (
-                          <p className="text-xs text-slate-600">—</p>
+                          <p className="text-xs text-slate-500">—</p>
                         )}
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
-            </ScrollArea>
+            </div>
           </TabsContent>
 
           {/* ------------------------------------------------- Estrutura */}
-          <TabsContent value="estrutura">
+          <TabsContent value="estrutura" className="pt-4">
             {!structure ? (
               <NotRun />
             ) : (
-              <ScrollArea className="h-[520px] pr-2.5 oracle-scroll lg:h-[560px]">
+              <div className="pr-0.5">
                 <div className="space-y-4">
                   <p className="text-sm leading-relaxed text-slate-300">
                     {structure.summary}
@@ -295,7 +294,7 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                         key={b.label}
                         className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3"
                       >
-                        <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                        <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                           {b.label}
                         </p>
                         <p className="text-xs leading-relaxed text-slate-300">{b.text}</p>
@@ -304,7 +303,7 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                   </div>
                   {structure.heroJourney.length > 0 ? (
                     <div>
-                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                         Jornada do Herói (Campbell)
                       </p>
                       <ul className="space-y-1.5">
@@ -345,16 +344,16 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                   ) : null}
                   <ConfidenceBar value={structure.confidence} />
                 </div>
-              </ScrollArea>
+              </div>
             )}
           </TabsContent>
 
           {/* ----------------------------------------------- Arquétipos */}
-          <TabsContent value="arquetipos">
+          <TabsContent value="arquetipos" className="pt-4">
             {!archetypes ? (
               <NotRun />
             ) : (
-              <ScrollArea className="h-[520px] pr-2.5 oracle-scroll lg:h-[560px]">
+              <div className="pr-0.5">
                 <div className="space-y-4">
                   <p className="text-sm leading-relaxed text-slate-300">
                     {archetypes.summary}
@@ -392,16 +391,16 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                   </div>
                   <ConfidenceBar value={archetypes.confidence} />
                 </div>
-              </ScrollArea>
+              </div>
             )}
           </TabsContent>
 
           {/* -------------------------------------------------- Símbolos */}
-          <TabsContent value="simbolos">
+          <TabsContent value="simbolos" className="pt-4">
             {!symbols ? (
               <NotRun />
             ) : (
-              <ScrollArea className="h-[520px] pr-2.5 oracle-scroll lg:h-[560px]">
+              <div className="pr-0.5">
                 <div className="space-y-4">
                   <p className="text-sm leading-relaxed text-slate-300">
                     {symbols.summary}
@@ -445,16 +444,16 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                   </ul>
                   <ConfidenceBar value={symbols.confidence} />
                 </div>
-              </ScrollArea>
+              </div>
             )}
           </TabsContent>
 
           {/* ---------------------------------------------------- Temas */}
-          <TabsContent value="temas">
+          <TabsContent value="temas" className="pt-4">
             {!themes ? (
               <NotRun />
             ) : (
-              <ScrollArea className="h-[520px] pr-2.5 oracle-scroll lg:h-[560px]">
+              <div className="pr-0.5">
                 <div className="space-y-4">
                   <p className="text-sm leading-relaxed text-slate-300">{themes.summary}</p>
                   <div className="flex flex-wrap gap-2">
@@ -470,7 +469,7 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                   </div>
                   {themes.existentialQuestions.length > 0 ? (
                     <div>
-                      <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                      <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                         <HelpCircle className="size-3.5 text-indigo-400/80" aria-hidden="true" />
                         Questões existenciais
                       </p>
@@ -488,7 +487,7 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                   ) : null}
                   {themes.ethicalDilemmas.length > 0 ? (
                     <div>
-                      <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                      <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                         <Scale className="size-3.5 text-amber-400/80" aria-hidden="true" />
                         Dilemas éticos
                       </p>
@@ -510,16 +509,16 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                   ) : null}
                   <ConfidenceBar value={themes.confidence} />
                 </div>
-              </ScrollArea>
+              </div>
             )}
           </TabsContent>
 
           {/* ---------------------------------------------- Psicanálise */}
-          <TabsContent value="psicanalise">
+          <TabsContent value="psicanalise" className="pt-4">
             {!psychoanalysis ? (
               <NotRun />
             ) : (
-              <ScrollArea className="h-[520px] pr-2.5 oracle-scroll lg:h-[560px]">
+              <div className="pr-0.5">
                 <div className="space-y-4">
                   {psychoanalysis.speculative ? (
                     <Alert className="border-amber-400/30 bg-amber-400/5 text-amber-200">
@@ -564,16 +563,16 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                   </div>
                   <ConfidenceBar value={psychoanalysis.confidence} />
                 </div>
-              </ScrollArea>
+              </div>
             )}
           </TabsContent>
 
           {/* ------------------------------------------- Cultural-Histórico */}
-          <TabsContent value="cultural">
+          <TabsContent value="cultural" className="pt-4">
             {!cultural ? (
               <NotRun />
             ) : (
-              <ScrollArea className="h-[520px] pr-2.5 oracle-scroll lg:h-[560px]">
+              <div className="pr-0.5">
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 rounded-lg border border-amber-400/25 bg-amber-400/5 px-3 py-2">
                     <Landmark className="size-4 shrink-0 text-amber-400" aria-hidden="true" />
@@ -586,7 +585,7 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                     {cultural.summary}
                   </p>
                   <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
-                    <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                    <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                       Contexto histórico
                     </p>
                     <p className="text-xs leading-relaxed text-slate-400">
@@ -604,7 +603,7 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                     tone="amber"
                   />
                   <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
-                    <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                    <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                       Recepção e diálogo cultural
                     </p>
                     <p className="text-xs leading-relaxed text-slate-400">
@@ -613,7 +612,7 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                   </div>
                   <ConfidenceBar value={cultural.confidence} />
                 </div>
-              </ScrollArea>
+              </div>
             )}
           </TabsContent>
         </Tabs>

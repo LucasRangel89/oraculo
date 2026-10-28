@@ -110,7 +110,7 @@ export function ComparisonModal() {
                   key={side.name}
                   className="rounded-lg border border-slate-800 bg-slate-950/40 p-4"
                 >
-                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                     Essência · {side.name}
                   </p>
                   <p className="text-sm leading-relaxed text-slate-300">{side.essence}</p>
@@ -160,7 +160,7 @@ export function ComparisonModal() {
             <div className="grid gap-3 md:grid-cols-2">
               {data.differences.length > 0 ? (
                 <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
-                  <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                     Diferenças
                   </h4>
                   <ul className="space-y-1.5">
@@ -181,7 +181,7 @@ export function ComparisonModal() {
               ) : null}
               {data.sharedSymbols.length > 0 ? (
                 <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
-                  <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                     Símbolos Compartilhados
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
@@ -202,7 +202,7 @@ export function ComparisonModal() {
             {/* Categorias */}
             {data.categories.length > 0 ? (
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] uppercase tracking-wider text-slate-500">
+                <span className="text-[11px] uppercase tracking-wider text-slate-400">
                   Categoria da conexão:
                 </span>
                 {data.categories.map((cat) => (
@@ -246,7 +246,7 @@ export function ComparisonModal() {
                     <Palette className="size-4" aria-hidden="true" />
                     Gerar Arte-Síntese
                   </Button>
-                  <p className="text-center text-[11px] text-slate-500">
+                  <p className="text-center text-[11px] text-slate-400">
                     Uma imagem inédita fundindo os símbolos de {data.a.name} e{" "}
                     {data.b.name}
                   </p>

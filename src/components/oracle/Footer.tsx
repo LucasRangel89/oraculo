@@ -32,7 +32,7 @@ export function Footer() {
               </span>
             ))}
           </p>
-          <p className="text-[11px] text-slate-600">
+          <p className="text-[11px] text-slate-400">
             © 2025 Oráculo das Conexões Narrativas
           </p>
         </div>
