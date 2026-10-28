@@ -217,7 +217,7 @@ export function ExploreTab() {
       {catalogLoading && catalog.length === 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="border-slate-800 bg-slate-900/50">
+            <Card key={i} className="border-slate-800 bg-slate-900/50 py-0">
               <CardContent className="space-y-3 p-5">
                 <Skeleton className="h-6 w-2/3 bg-slate-800" />
                 <Skeleton className="h-4 w-1/3 bg-slate-800" />

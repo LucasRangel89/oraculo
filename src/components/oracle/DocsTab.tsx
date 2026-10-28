@@ -58,7 +58,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <Card className="border-slate-800 bg-slate-900/50">
+    <Card className="border-slate-800 bg-slate-900/50 py-0">
       <CardContent className="p-5 md:p-7">
         <h2 className="mb-4 flex items-center gap-2.5 font-serif text-xl font-bold text-slate-100 md:text-2xl">
           <span className="flex size-9 items-center justify-center rounded-lg border border-indigo-400/30 bg-indigo-500/10">
