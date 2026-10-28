@@ -357,8 +357,8 @@ Alvo declarado: **WCAG 2.2 nível AA** nas telas principais. O que já está no 
 
 `npm run audit:a11y` (também no workflow de deploy) varre `src/app` e
 `src/components` por regressões objetivas. Ele **não substitui** teste com
-navegador + leitor de tela, que não roda no ambiente de desenvolvimento atual —
-ver a seção de limitações em `docs/DEPLOY.md`.
+navegador + leitor de tela: o que foi e o que não foi verificado está na seção D
+de **[docs/RELATORIO-UX-A11Y.md](docs/RELATORIO-UX-A11Y.md)**.
 
 ## 🗺️ Roadmap
 
