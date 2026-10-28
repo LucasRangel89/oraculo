@@ -16,6 +16,7 @@ const AGENT_MICROS: Record<AgentId, string> = {
   symbols: "Extraindo símbolos e motivos",
   themes: "Questões existenciais e éticas",
   psychoanalysis: "Leitura psicanalítica (Freud/Jung)",
+  cultural: "Situando a obra no tempo e na cultura",
   parallels: "Traçando paralelos mitológicos",
 };
 
@@ -59,7 +60,7 @@ export function ProgressScreen() {
                   : "border-amber-400/40 bg-amber-400/10 text-amber-200"
               }
             >
-              {depth === "completa" ? "Análise completa · 7 agentes" : "Análise rápida · 4 agentes"}
+              {depth === "completa" ? "Análise completa · 8 lentes" : "Análise rápida · 4 lentes"}
             </Badge>
           </div>
 

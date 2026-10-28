@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect -- boilerplate shadcn/ui: isMobile embla api publicados via effect */
 import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768

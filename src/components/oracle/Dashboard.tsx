@@ -5,9 +5,14 @@ import {
   AlertTriangle,
   Check,
   Copy,
+  Cpu,
   Download,
+  FileText,
+  FlaskConical,
   Info,
   RotateCcw,
+  Scale,
+  SlidersHorizontal,
   Sparkles,
   ThumbsDown,
   ThumbsUp,
@@ -28,12 +33,16 @@ import { ScoreRing } from "@/components/oracle/ScoreRing";
 import { ParallelsList } from "@/components/oracle/ParallelsList";
 import { NarrativeGraph } from "@/components/oracle/NarrativeGraph";
 import { AgentPanels } from "@/components/oracle/AgentPanels";
+import { Slider } from "@/components/ui/slider";
 import { copyJson, downloadJson } from "@/lib/oracle-client";
+import { analysisToMarkdown, downloadTextFile, slugify } from "@/lib/export-markdown";
 import { useOracleStore } from "@/lib/oracle-store";
 import {
   MEDIA_TYPE_COLORS,
   MEDIA_TYPE_LABELS,
+  SIMILARITY_WEIGHTS,
   type AnalysisResult,
+  type ScoreBreakdown,
 } from "@/lib/oracle-types";
 import { toast } from "@/hooks/use-toast";
 
@@ -83,6 +92,30 @@ function FactsCard({ result }: { result: AnalysisResult }) {
               do cache
             </Badge>
           ) : null}
+          <Badge
+            variant="outline"
+            className={
+              result.engine === "local"
+                ? "border-emerald-400/40 bg-emerald-400/10 text-[10px] uppercase tracking-wider text-emerald-300"
+                : "border-indigo-400/40 bg-indigo-500/10 text-[10px] uppercase tracking-wider text-indigo-300"
+            }
+            title={
+              result.engine === "local"
+                ? "Análise determinística sobre o catálogo curado — sem chamadas de LLM"
+                : "Análise produzida por agentes de IA"
+            }
+          >
+            {result.engine === "local" ? (
+              <FlaskConical className="mr-1 size-3" aria-hidden="true" />
+            ) : (
+              <Cpu className="mr-1 size-3" aria-hidden="true" />
+            )}
+            {result.engine === "local"
+              ? result.source === "reference"
+                ? "motor local · dossiê curado"
+                : "motor local · catálogo"
+              : "agentes de IA"}
+          </Badge>
         </div>
 
         <h2 className="oracle-title font-serif text-2xl font-bold leading-tight md:text-3xl">
@@ -163,10 +196,127 @@ function SummaryCard({ result }: { result: AnalysisResult }) {
       <Alert className="mt-4 border-slate-800 bg-slate-950/40 py-2.5">
         <Info className="size-3.5 text-slate-500" aria-hidden="true" />
         <AlertDescription className="text-xs text-slate-500">
-          Interpretação gerada por IA — hipóteses heurísticas, não fatos.
+          {result.engine === "local"
+            ? "Interpretação determinística sobre o catálogo curado — hipóteses heurísticas, não fatos. Configure um provedor de LLM para ativar as oito lentes generativas."
+            : "Interpretação gerada por IA — hipóteses heurísticas, não fatos."}
         </AlertDescription>
       </Alert>
     </section>
+  );
+}
+
+// -------------------------------------------------------------- WeightsDialog
+
+const WEIGHT_FIELDS: {
+  key: keyof ScoreBreakdown;
+  label: string;
+  hint: string;
+}[] = [
+  { key: "motifs", label: "Motivos", hint: "símbolos e imagens recorrentes" },
+  { key: "archetypes", label: "Arquétipos", hint: "funções junguianas" },
+  { key: "themes", label: "Temas", hint: "questões filosóficas e éticas" },
+  { key: "structure", label: "Estrutura", hint: "beats e jornada do herói" },
+];
+
+/**
+ * Ajuste de pesos do score — reivindicação explícita dos blueprints legados
+ * ("permitir usuário ajustar prioridades"). Recalcula o grafo no cliente.
+ */
+function WeightsDialog() {
+  const weights = useOracleStore((s) => s.weights);
+  const setWeights = useOracleStore((s) => s.setWeights);
+  const applyWeights = useOracleStore((s) => s.applyWeights);
+  const resetWeights = useOracleStore((s) => s.resetWeights);
+  const customized = useOracleStore((s) => s.weightsCustomized);
+  const [open, setOpen] = useState(false);
+
+  const total = WEIGHT_FIELDS.reduce((acc, f) => acc + weights[f.key], 0);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setOpen(true)}
+        className={
+          customized
+            ? "border-amber-400/40 bg-amber-400/10 text-amber-200 hover:bg-amber-400/20"
+            : "border-slate-700 bg-slate-950/40 text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+        }
+      >
+        <SlidersHorizontal className="size-4" aria-hidden="true" />
+        Ajustar pesos
+      </Button>
+      <DialogContent className="border-slate-800 bg-slate-900 sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 font-serif text-slate-100">
+            <Scale className="size-4 text-amber-300" aria-hidden="true" />
+            Pesos do score de similaridade
+          </DialogTitle>
+          <DialogDescription className="text-slate-400">
+            Mude o que importa para você e veja o grafo se reorganizar. O score
+            é sempre a média ponderada apenas das dimensões ativas.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-5 py-2">
+          {WEIGHT_FIELDS.map((field) => {
+            const value = Math.round(weights[field.key] * 100);
+            return (
+              <div key={field.key}>
+                <div className="mb-2 flex items-baseline justify-between">
+                  <label
+                    htmlFor={`weight-${field.key}`}
+                    className="text-sm text-slate-200"
+                  >
+                    {field.label}
+                    <span className="ml-1.5 text-xs text-slate-500">{field.hint}</span>
+                  </label>
+                  <span className="font-mono text-xs text-indigo-300">{value}%</span>
+                </div>
+                <Slider
+                  id={`weight-${field.key}`}
+                  value={[value]}
+                  min={0}
+                  max={100}
+                  step={5}
+                  onValueChange={([next]) =>
+                    setWeights({ ...weights, [field.key]: (next ?? 0) / 100 })
+                  }
+                  aria-label={`Peso de ${field.label}`}
+                />
+              </div>
+            );
+          })}
+          <p className="text-xs text-slate-500">
+            Soma atual: <span className="font-mono text-slate-300">{Math.round(total * 100)}%</span>{" "}
+            — a normalização é automática, então não é preciso fechar em 100%.
+          </p>
+        </div>
+
+        <DialogFooter className="gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => resetWeights()}
+            className="mr-auto text-slate-400 hover:text-slate-200"
+          >
+            <RotateCcw className="size-3.5" aria-hidden="true" />
+            Padrão (35/25/25/15)
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => {
+              applyWeights();
+              setOpen(false);
+            }}
+            className="bg-indigo-500 text-white hover:bg-indigo-400"
+          >
+            Recalcular grafo
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -221,6 +371,21 @@ function ActionBar({ result }: { result: AnalysisResult }) {
         <Copy className="size-4" aria-hidden="true" />
         Copiar JSON
       </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() =>
+          downloadTextFile(
+            `${slugify(result.facts.name)}-oraculo.md`,
+            analysisToMarkdown(result)
+          )
+        }
+        className="border-slate-700 bg-slate-950/40 text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+      >
+        <FileText className="size-4" aria-hidden="true" />
+        Dossiê .md
+      </Button>
+      <WeightsDialog />
 
       <div className="mx-1 hidden h-6 w-px bg-slate-800 sm:block" aria-hidden="true" />
 

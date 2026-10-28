@@ -30,6 +30,7 @@ function OracleLogo() {
 const TABS: { id: OracleTab; label: string }[] = [
   { id: "analise", label: "Análise" },
   { id: "explorar", label: "Explorar" },
+  { id: "acervo", label: "Acervo" },
   { id: "documentacao", label: "Documentação" },
 ];
 

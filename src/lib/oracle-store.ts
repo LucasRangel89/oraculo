@@ -7,9 +7,11 @@
  */
 import { create } from "zustand";
 import { toast } from "@/hooks/use-toast";
+import { buildParallelConnections } from "@/lib/parallels";
 import {
   AGENT_LABELS,
   DEPTH_AGENTS,
+  SIMILARITY_WEIGHTS,
   type AgentId,
   type AgentStatus,
   type AnalysisDepth,
@@ -17,6 +19,7 @@ import {
   type AnalysisResult,
   type CatalogEntry,
   type ComparisonResult,
+  type ScoreBreakdown,
 } from "@/lib/oracle-types";
 import {
   fetchAnalysis,
@@ -29,7 +32,10 @@ import {
 } from "@/lib/oracle-client";
 
 export type OracleView = "search" | "analyzing" | "result";
-export type OracleTab = "analise" | "explorar" | "documentacao";
+export type OracleTab = "analise" | "explorar" | "acervo" | "documentacao";
+
+/** Pesos em 0–1 (somam 1 no preset padrão). */
+export type OracleWeights = ScoreBreakdown;
 
 interface ComparisonState {
   open: boolean;
@@ -84,6 +90,10 @@ interface OracleState {
   catalog: CatalogEntry[];
   catalogLoading: boolean;
 
+  // transparência: pesos ajustáveis pelo usuário
+  weights: OracleWeights;
+  weightsCustomized: boolean;
+
   // modal de comparação profunda
   comparison: ComparisonState;
 
@@ -99,6 +109,9 @@ interface OracleState {
   closeComparison: () => void;
   generateArtwork: () => Promise<void>;
   submitFeedbackAction: (useful: boolean, comment?: string) => Promise<void>;
+  setWeights: (weights: OracleWeights) => void;
+  applyWeights: () => void;
+  resetWeights: () => void;
   resetToSearch: () => void;
 }
 
@@ -137,6 +150,9 @@ export const useOracleStore = create<OracleState>()((set, get) => ({
   recent: [],
   catalog: [],
   catalogLoading: false,
+
+  weights: { ...SIMILARITY_WEIGHTS },
+  weightsCustomized: false,
 
   comparison: { ...EMPTY_COMPARISON },
 
@@ -375,6 +391,41 @@ export const useOracleStore = create<OracleState>()((set, get) => ({
         description: message,
         variant: "destructive",
       });
+    }
+  },
+
+  setWeights: (weights) => {
+    set({ weights, weightsCustomized: true });
+  },
+
+  applyWeights: () => {
+    const { result, weights } = get();
+    if (!result) return;
+    const parallels = buildParallelConnections(result.fingerprint, result.facts.name, {
+      weights,
+      limit: Math.max(3, result.parallels.length || 5),
+      poolSize: 12,
+    });
+    set({
+      result: { ...result, parallels },
+      weightsCustomized: true,
+    });
+    toast({
+      title: "Scores recalculados",
+      description: "O grafo e a lista de paralelos foram refeitos com seus pesos.",
+    });
+  },
+
+  resetWeights: () => {
+    const { result } = get();
+    set({ weights: { ...SIMILARITY_WEIGHTS }, weightsCustomized: false });
+    if (result) {
+      const parallels = buildParallelConnections(result.fingerprint, result.facts.name, {
+        weights: SIMILARITY_WEIGHTS,
+        limit: Math.max(3, result.parallels.length || 5),
+        poolSize: 12,
+      });
+      set({ result: { ...result, parallels } });
     }
   },
 

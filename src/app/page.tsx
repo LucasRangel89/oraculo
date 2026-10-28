@@ -1,5 +1,6 @@
 "use client";
 
+import { ArchiveTab } from "@/components/oracle/ArchiveTab";
 import { Dashboard } from "@/components/oracle/Dashboard";
 import { ComparisonModal } from "@/components/oracle/ComparisonModal";
 import { DocsTab } from "@/components/oracle/DocsTab";
@@ -22,6 +23,8 @@ export default function Page() {
           <DocsTab />
         ) : tab === "explorar" ? (
           <ExploreTab />
+        ) : tab === "acervo" ? (
+          <ArchiveTab />
         ) : view === "search" ? (
           <SearchScreen />
         ) : view === "analyzing" ? (

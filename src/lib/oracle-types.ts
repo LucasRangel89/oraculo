@@ -54,6 +54,7 @@ export const AGENT_IDS = [
   "symbols",
   "themes",
   "psychoanalysis",
+  "cultural",
   "parallels",
 ] as const;
 
@@ -66,7 +67,20 @@ export const AGENT_LABELS: Record<AgentId, string> = {
   symbols: "Agente Simbólico",
   themes: "Agente Filosófico-Temático",
   psychoanalysis: "Agente Psicanalítico",
+  cultural: "Agente Cultural-Histórico",
   parallels: "Agente Comparativo Mitológico",
+};
+
+/** Personas dos agentes — vozes distintas extraídas dos blueprints legados. */
+export const AGENT_PERSONAS: Record<AgentId, string> = {
+  facts: "O Arquivista",
+  structure: "O Arquiteto Narrativo",
+  archetypes: "O Dramaturgo",
+  symbols: "O Simbolista",
+  themes: "O Filósofo",
+  psychoanalysis: "O Psicanalista",
+  cultural: "O Historiador Social",
+  parallels: "O Comparativista",
 };
 
 /** Agentes executados por profundidade */
@@ -74,6 +88,23 @@ export const DEPTH_AGENTS: Record<AnalysisDepth, AgentId[]> = {
   rapida: ["facts", "structure", "symbols", "parallels"],
   completa: [...AGENT_IDS],
 };
+
+/**
+ * Motor que produziu a análise.
+ * - "llm": agentes especialistas apoiados em um modelo de linguagem;
+ * - "local": motor hermenêutico determinístico sobre o catálogo curado
+ *   (modo demonstração — funciona sem chave de API).
+ */
+export type AnalysisEngine = "llm" | "local";
+
+/**
+ * Origem do conteúdo de uma análise.
+ * - "llm": gerado pelos agentes;
+ * - "reference": dossiê curado (extraído do acervo legado);
+ * - "catalog": derivado do catálogo curado;
+ * - "heuristic": derivado por heurística simbólica.
+ */
+export type AnalysisSource = "llm" | "reference" | "catalog" | "heuristic";
 
 // ---------------------------------------------------------------------------
 // Fatos da narrativa (Agente Identificador)
@@ -180,6 +211,24 @@ export interface PsychoanalysisData {
   confidence: number;
 }
 
+/**
+ * Agente Cultural-Histórico ("O Historiador Social").
+ * Presente nos blueprints legados e no relatório de "O Senhor dos Anéis",
+ * estava ausente da implementação original — incorporado nesta versão.
+ */
+export interface CulturalAnalysis {
+  summary: string;
+  /** parágrafo sobre o momento histórico de criação/produção */
+  historicalContext: string;
+  /** influências, fontes e linhagens reconhecíveis */
+  culturalInfluences: string[];
+  /** valores da época refletidos, contestados ou subvertidos */
+  valuesAndTensions: string[];
+  /** recepção, impacto e diálogo cultural */
+  reception: string;
+  confidence: number;
+}
+
 // ---------------------------------------------------------------------------
 // Fingerprint narrativo + similaridade
 // ---------------------------------------------------------------------------
@@ -203,8 +252,13 @@ export interface Connection {
   name: string;
   origin: string;
   type: MediaType;
-  /** 0–100, score composto final */
+  /** 0–100, índice calibrado exibido na UI (ranking idêntico ao bruto) */
   score: number;
+  /**
+   * 0–100, similaridade bruta do fingerprint (média ponderada de listSimilarity).
+   * Preservada para auditoria: o índice exibido é uma correção monotônica.
+   */
+  rawScore?: number;
   /** transparência do cálculo (exibida na UI) */
   breakdown: ScoreBreakdown;
   /** 3–5 pontos de convergência específicos */
@@ -232,6 +286,7 @@ export interface AnalysisResult {
   symbols: SymbolAnalysis | null;
   themes: ThematicAnalysis | null;
   psychoanalysis: PsychoanalysisData | null;
+  cultural: CulturalAnalysis | null;
   /** paralelos ordenados por score desc */
   parallels: Connection[];
   fingerprint: Fingerprint;
@@ -240,6 +295,10 @@ export interface AnalysisResult {
   /** resumo executivo do Orquestrador (80–120 palavras) */
   summary: string;
   cached: boolean;
+  /** motor que produziu a análise */
+  engine: AnalysisEngine;
+  /** origem predominante do conteúdo */
+  source: AnalysisSource;
   /** ISO string */
   createdAt: string;
 }
@@ -332,6 +391,23 @@ export interface CatalogResponse {
 // ---------------------------------------------------------------------------
 // Feedback / histórico
 // ---------------------------------------------------------------------------
+
+export interface EngineStatus {
+  ok: boolean;
+  engine: "zai" | "openai" | "local";
+  provider: string;
+  model: string;
+  reason: string;
+  store: "prisma" | "file";
+  catalog: {
+    narratives: number;
+    traditions: number;
+    motifs: number;
+    archetypes: number;
+    themes: number;
+  };
+  timestamp: string;
+}
 
 export interface FeedbackRequest {
   analysisId: string;

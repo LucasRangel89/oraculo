@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
 import { analysisResultFromRecord } from "@/lib/oracle-agents";
+import { getRepository } from "@/lib/persistence";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,7 +12,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const record = await db.analysis.findUnique({ where: { id } });
+    const repo = await getRepository();
+    const record = await repo.findById(id);
 
     if (!record) {
       return NextResponse.json({ error: "Análise não encontrada." }, { status: 404 });

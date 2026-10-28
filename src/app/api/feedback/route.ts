@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { getRepository } from "@/lib/persistence";
 import type { FeedbackRequest } from "@/lib/oracle-types";
 
 export const runtime = "nodejs";
@@ -24,7 +24,8 @@ export async function POST(req: NextRequest) {
     }
 
     const analysisId = body.analysisId.trim();
-    const analysis = await db.analysis.findUnique({ where: { id: analysisId } });
+    const repo = await getRepository();
+    const analysis = await repo.findById(analysisId);
 
     if (!analysis) {
       return NextResponse.json(
@@ -38,11 +39,7 @@ export async function POST(req: NextRequest) {
         ? body.comment.trim()
         : null;
 
-    await db.feedback.upsert({
-      where: { analysisId },
-      update: { useful: body.useful, comment },
-      create: { analysisId, useful: body.useful, comment },
-    });
+    await repo.saveFeedback({ analysisId, useful: body.useful, comment });
 
     return NextResponse.json({ ok: true });
   } catch (err) {

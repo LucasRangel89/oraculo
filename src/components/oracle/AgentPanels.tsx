@@ -8,6 +8,7 @@ import {
   Drama,
   HelpCircle,
   KeyRound,
+  Landmark,
   Layers,
   Minus,
   Scale,
@@ -132,8 +133,16 @@ interface AgentPanelsProps {
 }
 
 export function AgentPanels({ result }: AgentPanelsProps) {
-  const { facts, structure, archetypes, symbols, themes, psychoanalysis, fingerprint } =
-    result;
+  const {
+    facts,
+    structure,
+    archetypes,
+    symbols,
+    themes,
+    psychoanalysis,
+    cultural,
+    fingerprint,
+  } = result;
 
   return (
     <Card className="flex h-full flex-col border-slate-800 bg-slate-900/60">
@@ -182,6 +191,13 @@ export function AgentPanels({ result }: AgentPanelsProps) {
               >
                 <Brain className="size-3.5" aria-hidden="true" />
                 Psicanálise
+              </TabsTrigger>
+              <TabsTrigger
+                value="cultural"
+                className="gap-1.5 text-xs data-[state=active]:border-amber-400/40 data-[state=active]:bg-amber-400/10 data-[state=active]:text-amber-100 sm:text-sm"
+              >
+                <Landmark className="size-3.5" aria-hidden="true" />
+                Cultural
               </TabsTrigger>
             </TabsList>
           </div>
@@ -547,6 +563,55 @@ export function AgentPanels({ result }: AgentPanelsProps) {
                     </div>
                   </div>
                   <ConfidenceBar value={psychoanalysis.confidence} />
+                </div>
+              </ScrollArea>
+            )}
+          </TabsContent>
+
+          {/* ------------------------------------------- Cultural-Histórico */}
+          <TabsContent value="cultural">
+            {!cultural ? (
+              <NotRun />
+            ) : (
+              <ScrollArea className="h-[520px] pr-2.5 oracle-scroll lg:h-[560px]">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 rounded-lg border border-amber-400/25 bg-amber-400/5 px-3 py-2">
+                    <Landmark className="size-4 shrink-0 text-amber-400" aria-hidden="true" />
+                    <p className="text-xs text-amber-200/90">
+                      O Historiador Social — lente cultural-histórica incorporada dos
+                      blueprints legados.
+                    </p>
+                  </div>
+                  <p className="text-sm leading-relaxed text-slate-300">
+                    {cultural.summary}
+                  </p>
+                  <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                    <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                      Contexto histórico
+                    </p>
+                    <p className="text-xs leading-relaxed text-slate-400">
+                      {cultural.historicalContext}
+                    </p>
+                  </div>
+                  <ChipGroup
+                    label="Influências e linhagens"
+                    items={cultural.culturalInfluences}
+                    tone="indigo"
+                  />
+                  <ChipGroup
+                    label="Valores e tensões"
+                    items={cultural.valuesAndTensions}
+                    tone="amber"
+                  />
+                  <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                    <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                      Recepção e diálogo cultural
+                    </p>
+                    <p className="text-xs leading-relaxed text-slate-400">
+                      {cultural.reception}
+                    </p>
+                  </div>
+                  <ConfidenceBar value={cultural.confidence} />
                 </div>
               </ScrollArea>
             )}

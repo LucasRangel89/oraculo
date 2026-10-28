@@ -1,10 +1,10 @@
-import ZAI from "z-ai-web-dev-sdk";
 import { MEDIA_TYPE_LABELS } from "@/lib/oracle-types";
 import type {
   AnalysisResult,
   ArchetypeAnalysis,
   ArchetypeEntry,
   Connection,
+  CulturalAnalysis,
   Fingerprint,
   HeroJourneyStage,
   MediaType,
@@ -15,24 +15,24 @@ import type {
   SymbolEntry,
   ThematicAnalysis,
 } from "@/lib/oracle-types";
-import { catalogEntryToFingerprint } from "@/lib/similarity";
+import { callLLMJson } from "@/lib/llm";
+import {
+  ARCHETYPES_SYSTEM,
+  CULTURAL_SYSTEM,
+  FACTS_SYSTEM,
+  PARALLELS_SYSTEM,
+  PSYCHOANALYSIS_SYSTEM,
+  STRUCTURE_SYSTEM,
+  SUMMARY_SYSTEM,
+  SYMBOLS_SYSTEM,
+  THEMES_SYSTEM,
+} from "@/lib/prompt-library";
+import { calibrateScore, catalogEntryToFingerprint } from "@/lib/similarity";
 import type { CandidateMatch } from "@/lib/similarity";
 import { normalizeText } from "@/lib/similarity";
 
-// ---------------------------------------------------------------------------
-// Singleton ZAI (backend only)
-// ---------------------------------------------------------------------------
-
-type ZAIInstance = Awaited<ReturnType<typeof ZAI.create>>;
-
-let zaiPromise: Promise<ZAIInstance> | null = null;
-
-async function getZAI(): Promise<ZAIInstance> {
-  if (!zaiPromise) {
-    zaiPromise = ZAI.create();
-  }
-  return zaiPromise;
-}
+// Reexportado para os demais módulos do backend (rotas /compare etc.).
+export { callLLMJson };
 
 // ---------------------------------------------------------------------------
 // Erros controlados
@@ -51,80 +51,6 @@ export class NarrativeNotFoundError extends Error {
 // ---------------------------------------------------------------------------
 // Helpers de extração/validação
 // ---------------------------------------------------------------------------
-
-/** Extrai o primeiro objeto JSON de um texto (tolerante a fences e texto extra). */
-function extractJsonObject(text: string): unknown {
-  const cleaned = text
-    .replace(/```[a-zA-Z]*\s*/g, "")
-    .replace(/```/g, "")
-    .trim();
-  const first = cleaned.indexOf("{");
-  const last = cleaned.lastIndexOf("}");
-  if (first === -1 || last === -1 || last <= first) {
-    throw new Error("Nenhum objeto JSON encontrado na resposta do modelo.");
-  }
-  const slice = cleaned.slice(first, last + 1);
-  return JSON.parse(slice);
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/**
- * Chama o LLM exigindo JSON puro e faz parse robusto.
- * Erros "normais" consomem o orçamento de `retries`; erros de rate-limit (429)
- * têm orçamento próprio com backoff crescente, pois os agentes rodando em
- * paralelo podem estourar o limite momentâneo da API.
- */
-export async function callLLMJson<T>(
-  system: string,
-  user: string,
-  retries = 2
-): Promise<T> {
-  let lastError: unknown = null;
-  let normalRetriesLeft = retries;
-  let rateRetriesLeft = 3;
-
-  const isRateLimited = (msg: string): boolean =>
-    /429|too many requests|rate ?limit/i.test(msg);
-
-  while (true) {
-    try {
-      const zai = await getZAI();
-      const completion = await zai.chat.completions.create({
-        messages: [
-          { role: "assistant", content: system },
-          { role: "user", content: user },
-        ],
-        thinking: { type: "disabled" },
-      });
-      const text = completion.choices[0]?.message?.content ?? "";
-      if (!text.trim()) {
-        throw new Error("Resposta vazia do modelo.");
-      }
-      const parsed = extractJsonObject(text);
-      return parsed as T;
-    } catch (err) {
-      lastError = err;
-      const msg = err instanceof Error ? err.message : String(err);
-      if (isRateLimited(msg) && rateRetriesLeft > 0) {
-        rateRetriesLeft -= 1;
-        await sleep([5000, 15000, 30000][2 - rateRetriesLeft]); // 5s, 15s, 30s
-        continue;
-      }
-      if (!isRateLimited(msg) && normalRetriesLeft > 0) {
-        normalRetriesLeft -= 1;
-        await sleep(500);
-        continue;
-      }
-      break;
-    }
-  }
-  const msg = lastError instanceof Error ? lastError.message : String(lastError);
-  throw new Error(`Falha ao obter JSON válido do LLM: ${msg}`);
-}
-
 function asString(value: unknown, fallback = ""): string {
   if (typeof value === "string" && value.trim().length > 0) return value.trim();
   return fallback;
@@ -207,21 +133,6 @@ function factsDigest(facts: NarrativeFacts): string {
 // Agente Identificador (facts)
 // ---------------------------------------------------------------------------
 
-const FACTS_SYSTEM = `Você é o Agente Identificador do Oráculo das Conexões Narrativas. Você faz busca factual sobre narrativas mundiais (mitologia, folclore, literatura, cinema, séries, música, arte).
-Sua tarefa: identificar a narrativa informada pelo usuário e devolver fatos objetivos.
-Responda APENAS com um objeto JSON válido, sem nenhum texto fora do JSON, no formato exato:
-{"name": string, "type": "mito"|"lenda"|"filme"|"serie"|"livro"|"musica"|"arte", "origin": string, "period": string, "characters": string[], "synopsis": string, "found": boolean, "variants": string[]}
-Regras:
-- "name": nome oficial mais reconhecível da narrativa (forma consagrada em português, quando existir).
-- "type": um dos valores exatamente como listado acima.
-- "origin": origem cultural (ex.: "Mitologia Grega").
-- "period": período aproximado (ex.: "séc. VIII a.C.").
-- "characters": até 6 personagens principais.
-- "synopsis": sinopse breve com no máximo 100 palavras.
-- Se você NÃO reconhecer a narrativa com confiança razoável: "found": false e "variants" com até 5 nomes de narrativas semelhantes que o usuário talvez quisesse dizer.
-- Se reconhecer: "found": true e "variants": [].
-- Nunca escreva nada fora do JSON.`;
-
 export const FACTS_AGENT_CONFIDENCE = 0.85;
 
 export async function runFactsAgent(input: string): Promise<NarrativeFacts> {
@@ -269,20 +180,6 @@ export const CAMPBELL_STAGES = [
   "Ressurreição",
   "Retorno com Elixir",
 ] as const;
-
-const STRUCTURE_SYSTEM = `Você é o Agente Estruturalista do Oráculo das Conexões Narrativas, especialista em narratologia comparada e nas teorias de Joseph Campbell (A Jornada do Herói) e Christopher Vogler.
-Recebe os fatos de uma narrativa e devolve a análise estrutural completa.
-Responda APENAS com um objeto JSON válido, sem nenhum texto fora do JSON, no formato exato:
-{"summary": string, "acts": number, "beats": string[], "incitingIncident": string, "climax": string, "resolution": string, "tone": string, "heroJourney": [{"stage": string, "present": boolean, "evidence": string}], "confidence": number}
-Regras:
-- "summary": parágrafo de no máximo 120 palavras sobre a arquitetura narrativa.
-- "acts": quantidade de atos (1, 2, 3 ou 5).
-- "beats": de 4 a 8 beats narrativos principais em snake_case (ex.: "chamado_a_aventura", "provacao", "retorno").
-- "incitingIncident", "climax", "resolution": descrições curtas e específicas.
-- "tone": tom dominante da narrativa (ex.: "épico-trágico").
-- "heroJourney": avalie TODOS os 12 estágios de Campbell, nesta ordem exata: "Mundo Comum", "Chamado à Aventura", "Recusa do Chamado", "Encontro com o Mentor", "Travessia do Primeiro Limiar", "Testes, Aliados e Inimigos", "Aproximação da Caverna Oculta", "Provação", "Recompensa", "Caminho de Volta", "Ressurreição", "Retorno com Elixir". Para cada estágio: "present" (true/false) e "evidence" = cena ou evidência específica curta; se o estágio estiver ausente da narrativa, a "evidence" deve descrever o impacto narrativo dessa ausência.
-- "confidence": número entre 0 e 1.
-- Nunca escreva nada fora do JSON.`;
 
 function validateHeroJourney(value: unknown): HeroJourneyStage[] {
   const arr = Array.isArray(value) ? value.map(asRecord) : [];
@@ -351,18 +248,6 @@ export async function runStructureAgent(
 // Agente Arquetípico (archetypes)
 // ---------------------------------------------------------------------------
 
-const ARCHETYPES_SYSTEM = `Você é o Agente Arquetípico do Oráculo das Conexões Narrativas, especialista na psicologia analítica de Carl Gustav Jung e Marie-Louise von Franz.
-Recebe os fatos de uma narrativa e mapeia os arquétipos junguianos presentes nos personagens.
-Responda APENAS com um objeto JSON válido, sem nenhum texto fora do JSON, no formato exato:
-{"summary": string, "archetypes": [{"character": string, "archetype": string, "description": string}], "individuation": string, "confidence": number}
-Regras:
-- "summary": parágrafo curto sobre o quadro arquetípico da narrativa.
-- "archetypes": de 3 a 6 entradas. "archetype" deve ser um arquétipo junguiano (ex.: "Herói", "Mentor", "Sombra", "Trickster", "Anima/Animus", "Guardião do Limiar", "Rei Sagrado", "Messias", "Herói Trágico", "Herói Cultural", "Grande Mãe").
-- "description": papel do personagem + objetivo consciente/inconsciente, curto.
-- "individuation": nota sobre o processo de individuação presente na narrativa ("não aplicável" se for o caso).
-- "confidence": número entre 0 e 1.
-- Nunca escreva nada fora do JSON.`;
-
 export async function runArchetypesAgent(
   _input: string,
   facts: NarrativeFacts
@@ -391,23 +276,6 @@ export async function runArchetypesAgent(
 // ---------------------------------------------------------------------------
 // Agente Simbólico (symbols)
 // ---------------------------------------------------------------------------
-
-const SYMBOLS_SYSTEM = `Você é o Agente Simbólico do Oráculo das Conexões Narrativas, especialista em dicionários de símbolos (Jean Chevalier & Alain Gheerbrant, Juan Eduardo Cirlot) e hermenêutica simbólica.
-Recebe os fatos de uma narrativa e extrai os símbolos centrais e seus significados.
-Responda APENAS com um objeto JSON válido, sem nenhum texto fora do JSON, no formato exato:
-{"summary": string, "symbols": [{"symbol": string, "meaning": string, "universalMeaning": string, "presence": "leve"|"moderado"|"forte", "historicalParallels": string[]}], "confidence": number}
-Regras:
-- "summary": parágrafo curto sobre o tecido simbólico da narrativa.
-- "symbols": de 3 a 6 símbolos centrais.
-- IMPORTANTE: prefira símbolos e motivos UNIVERSAIS em forma curta (ex.: "fogo", "travessia da água", "monstro a ser morto", "auxílio divino", "proibição", "descida ao submundo", "máscara") em vez de objetos muito específicos (evite nomes próprios ou artefatos exclusivos como "escudo de Atena"); inclua no máximo 1 símbolo muito específico da obra.
-- VOCABULÁRIO CANÔNICO PREFERENCIAL (use estas formas curtas sempre que se aplicarem à narrativa): "jornada do herói", "chamado à aventura", "travessia", "travessia da água", "nascimento miraculoso", "orfandade", "profecia", "destino inevitável", "mentor sábio", "auxílio divino", "objeto mágico", "monstro a ser morto", "missão impossível", "resgate", "sacrifício", "sacrifício pela humanidade", "descida ao submundo", "morte e renascimento", "ressurreição", "renascimento", "dilúvio", "fogo", "fogo do conhecimento", "árvore da vida", "máscara", "vingança", "pacto proibido", "tentação", "proibição", "expiação", "queda e redenção", "exílio", "retorno do rei", "trickster", "astúcia", "punição divina", "desafio aos deuses", "apocalipse", "julgamento". Selecione APENAS os que realmente operam na narrativa — não force todos.
-- Exemplo de escolha boa para Prometeu: ["fogo do conhecimento", "punição divina", "sacrifício pela humanidade", "desafio aos deuses"] — e NÃO ["fígado regenerando-se", "montanha"].
-- "meaning": significado do símbolo NO contexto da narrativa.
-- "universalMeaning": significado universal do símbolo (string vazia se for muito específico).
-- "presence": intensidade com que o símbolo opera na narrativa ("leve"|"moderado"|"forte").
-- "historicalParallels": até 3 outras narrativas, mitos ou obras históricas em que o mesmo símbolo aparece.
-- "confidence": número entre 0 e 1.
-- Nunca escreva nada fora do JSON.`;
 
 const PRESENCE_VALUES: SymbolEntry["presence"][] = ["leve", "moderado", "forte"];
 
@@ -446,18 +314,6 @@ export async function runSymbolsAgent(
 // Agente Filosófico-Temático (themes)
 // ---------------------------------------------------------------------------
 
-const THEMES_SYSTEM = `Você é o Agente Filosófico-Temático do Oráculo das Conexões Narrativas, especialista em filosofia, ética e temas universais da condição humana.
-Recebe os fatos de uma narrativa e extrai temas, questões existenciais e dilemas éticos.
-Responda APENAS com um objeto JSON válido, sem nenhum texto fora do JSON, no formato exato:
-{"summary": string, "themes": string[], "existentialQuestions": string[], "ethicalDilemmas": string[], "confidence": number}
-Regras:
-- "summary": parágrafo curto sobre o horizonte temático da narrativa.
-- "themes": de 3 a 5 temas universais, cada um com 2 a 4 palavras (ex.: "sacrifício pela humanidade", "destino versus livre-arbítrio").
-- "existentialQuestions": de 2 a 4 perguntas existenciais que a narrativa formula ao leitor.
-- "ethicalDilemmas": de 1 a 3 dilemas éticos centrais.
-- "confidence": número entre 0 e 1.
-- Nunca escreva nada fora do JSON.`;
-
 export async function runThemesAgent(
   _input: string,
   facts: NarrativeFacts
@@ -477,21 +333,6 @@ export async function runThemesAgent(
 // ---------------------------------------------------------------------------
 // Agente Psicanalítico (psychoanalysis)
 // ---------------------------------------------------------------------------
-
-const PSYCHOANALYSIS_SYSTEM = `Você é o Agente Psicanalítico do Oráculo das Conexões Narrativas, especialista nas lentes freudiana (inconsciente, pulsões, recalcamento, complexo de Édipo) e junguiana (complexos, arquétipos, sombra, individuação).
-Recebe os fatos de uma narrativa e produz uma leitura psicanalítica.
-Responda APENAS com um objeto JSON válido, sem nenhum texto fora do JSON, no formato exato:
-{"summary": string, "complexes": string[], "unconsciousDesires": string[], "freudianReading": string, "jungianReading": string, "speculative": boolean, "disclaimer": string, "confidence": number}
-Regras:
-- "summary": parágrafo curto da leitura psicanalítica.
-- "complexes": de 2 a 4 complexos psíquicos identificados nos personagens.
-- "unconsciousDesires": de 2 a 4 desejos inconscientes em jogo na narrativa.
-- "freudianReading": 1 parágrafo (máx. ~110 palavras) na lente freudiana.
-- "jungianReading": 1 parágrafo (máx. ~110 palavras) na lente junguiana.
-- "speculative": true sempre que a leitura for hipótese interpretativa (na prática, quase sempre true).
-- "disclaimer": aviso obrigatório de que a leitura psicanalítica é interpretativa e especulativa, sem valor diagnóstico.
-- "confidence": número entre 0 e 1.
-- Nunca escreva nada fora do JSON.`;
 
 export async function runPsychoanalysisAgent(
   _input: string,
@@ -516,23 +357,31 @@ export async function runPsychoanalysisAgent(
 }
 
 // ---------------------------------------------------------------------------
-// Agente Comparativo Mitológico (parallels) — com GROUNDING no catálogo
+// Agente Cultural-Histórico (cultural) — "O Historiador Social"
+// Lente presente nos blueprints legados e no relatório de O Senhor dos Anéis
+// ("contexto histórico", "diálogo cultural", "intertextualidade").
 // ---------------------------------------------------------------------------
 
-const PARALLELS_SYSTEM = `Você é o Agente Comparativo Mitológico do Oráculo das Conexões Narrativas, especialista em mitologia comparada (James Frazer, Lord Raglan, Vladimir Propp, Joseph Campbell, Claude Lévi-Strauss).
-Você receberá: (1) os fatos da narrativa analisada; (2) o fingerprint narrativo; (3) uma lista FECHADA de candidatos aprovados pelo sistema de similaridade determinística.
-REGRA DE GROUNDING ABSOLUTA: use APENAS nomes que estejam na lista de candidatos. NUNCA invente, substitua ou acrescente paralelos fora da lista.
-Responda APENAS com um objeto JSON válido, sem nenhum texto fora do JSON, no formato exato:
-{"parallels": [{"name": string, "convergences": string[], "differences": string[], "categories": string[], "reason": string, "adjust": number}]}
-Regras:
-- Retorne exatamente os 5 melhores candidatos da lista, ordenados pela força do paralelismo.
-- "name": EXATAMENTE igual ao nome do candidato da lista.
-- "convergences": de 3 a 5 pontos de convergência específicos, citando motivos, arquétipos, temas ou beats concretos de ambos os lados.
-- "differences": de 2 a 3 diferenças significativas.
-- "categories": subconjunto de ["estrutural","arquetípica","simbólica","temática"].
-- "reason": justificativa legível de no máximo 40 palavras.
-- "adjust": número entre -8 e 8 ajustando o score determinístico conforme sua avaliação qualitativa do paralelismo (0 se neutro).
-- Nunca escreva nada fora do JSON.`;
+export async function runCulturalAgent(
+  _input: string,
+  facts: NarrativeFacts
+): Promise<CulturalAnalysis> {
+  const user = `Fatos da narrativa:\n${factsDigest(facts)}\n\nProduza a leitura cultural-histórica (somente JSON).`;
+  const raw = await callLLMJson<Record<string, unknown>>(CULTURAL_SYSTEM, user);
+
+  return {
+    summary: asString(raw.summary, "Leitura cultural-histórica não disponível."),
+    historicalContext: asString(raw.historicalContext, ""),
+    culturalInfluences: asStringArray(raw.culturalInfluences, 5),
+    valuesAndTensions: asStringArray(raw.valuesAndTensions, 4),
+    reception: asString(raw.reception, ""),
+    confidence: clampConfidence(raw.confidence),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Agente Comparativo Mitológico (parallels) — com GROUNDING no catálogo
+// ---------------------------------------------------------------------------
 
 function candidatesDigest(candidates: CandidateMatch[]): string {
   return candidates
@@ -622,7 +471,8 @@ function deterministicConnection(
     name: cand.entry.name,
     origin: cand.entry.origin,
     type: cand.entry.type,
-    score: Math.max(5, Math.min(99, cand.score)),
+    score: calibrateScore(cand.score),
+    rawScore: cand.score,
     breakdown: cand.breakdown,
     convergences: parts.convergences.slice(0, 5),
     differences: parts.differences.slice(0, 3),
@@ -639,7 +489,8 @@ function mergeLLMConnection(
 ): Connection {
   const adjustRaw = asNumber(raw.adjust, 0);
   const adjust = Math.max(-8, Math.min(8, adjustRaw));
-  const score = Math.max(5, Math.min(99, cand.score + adjust));
+  const rawScore = Math.max(0, Math.min(100, cand.score + adjust));
+  const score = calibrateScore(rawScore);
 
   const parts = deterministicParts(fingerprint, cand);
 
@@ -678,6 +529,7 @@ function mergeLLMConnection(
     origin: cand.entry.origin,
     type: cand.entry.type,
     score,
+    rawScore,
     breakdown: cand.breakdown,
     convergences: convergences.slice(0, 5),
     differences: differences.slice(0, 3),
@@ -754,7 +606,9 @@ export interface AnalysisRecordLike {
   createdAt: Date;
 }
 
-/** Converte o registro do DB (payload JSON) de volta para AnalysisResult (cached). */
+/**
+ * Converte o registro do DB (payload JSON) de volta para AnalysisResult (cached).
+ */
 export function analysisResultFromRecord(
   record: AnalysisRecordLike
 ): AnalysisResult {
@@ -778,12 +632,16 @@ export function analysisResultFromRecord(
         symbols: parsed.symbols ?? null,
         themes: parsed.themes ?? null,
         psychoanalysis: parsed.psychoanalysis ?? null,
+        cultural: parsed.cultural ?? null,
         parallels: parsed.parallels ?? [],
         fingerprint: parsed.fingerprint,
         confidence:
           typeof parsed.confidence === "number" ? parsed.confidence : meta.confidence,
         summary: parsed.summary ?? "",
         cached: true,
+        // payloads antigos não registravam o motor: assume-se LLM
+        engine: parsed.engine === "local" ? "local" : "llm",
+        source: parsed.source ?? "llm",
         createdAt: meta.createdAt,
       };
     }
@@ -809,11 +667,14 @@ export function analysisResultFromRecord(
     symbols: null,
     themes: null,
     psychoanalysis: null,
+    cultural: null,
     parallels: [],
     fingerprint: { motifs: [], archetypes: [], themes: [], beats: [] },
     confidence: meta.confidence,
     summary: "",
     cached: true,
+    engine: "llm",
+    source: "llm",
     createdAt: meta.createdAt,
   };
 }
@@ -821,15 +682,6 @@ export function analysisResultFromRecord(
 // ---------------------------------------------------------------------------
 // Orquestrador — resumo executivo
 // ---------------------------------------------------------------------------
-
-const SUMMARY_SYSTEM = `Você é o Orquestrador do Oráculo das Conexões Narrativas. Sua função é escrever o resumo executivo da análise.
-Você recebe o input do usuário, os fatos da narrativa e os paralelos ranqueados.
-Responda APENAS com um objeto JSON válido, sem nenhum texto fora do JSON, no formato exato:
-{"summary": string}
-Regras:
-- "summary": 1 parágrafo de 80 a 120 palavras explicando o paralelismo principal da narrativa, citando explicitamente as conexões mais fortes (nomes e scores de 0 a 100) e o que elas revelam sobre a narrativa analisada.
-- IMPORTANTE: baseie-se SOMENTE na lista de paralelos fornecida; NUNCA invente conexões, nomes ou scores fora dessa lista. Se a lista estiver vazia, explique que nenhum paralelo forte foi encontrado no catálogo e destaque os padrões universais identificados.
-- Nunca escreva nada fora do JSON.`;
 
 function executiveSummaryFallback(
   facts: NarrativeFacts,

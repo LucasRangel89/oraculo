@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowUpRight,
+  Cpu,
   Dices,
+  FlaskConical,
   History,
   ScanEye,
   Share2,
@@ -14,9 +16,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { relativeTime } from "@/lib/oracle-client";
+import { fetchEngineStatus, relativeTime } from "@/lib/oracle-client";
 import { useOracleStore } from "@/lib/oracle-store";
-import type { AnalysisDepth } from "@/lib/oracle-types";
+import type { AnalysisDepth, EngineStatus } from "@/lib/oracle-types";
 
 const FALLBACK_SUGGESTIONS = [
   "Perseu",
@@ -38,7 +40,7 @@ const DEPTH_OPTIONS: {
   icon: typeof Zap;
 }[] = [
   { id: "rapida", title: "Rápida", desc: "4 agentes essenciais", icon: Zap },
-  { id: "completa", title: "Completa", desc: "Todos os 7 agentes", icon: ScanEye },
+  { id: "completa", title: "Completa", desc: "Todas as 8 lentes", icon: ScanEye },
 ];
 
 const HOW_IT_WORKS = [
@@ -52,7 +54,7 @@ const HOW_IT_WORKS = [
     step: "2",
     icon: ScanEye,
     title: "Lentes",
-    desc: "Até 7 agentes especialistas dissecam a história em paralelo, do estrutural ao psicanalítico.",
+    desc: "Até 8 lentes especialistas dissecam a história em paralelo — do estrutural ao cultural-histórico.",
   },
   {
     step: "3",
@@ -74,6 +76,7 @@ export function SearchScreen() {
   const catalog = useOracleStore((s) => s.catalog);
   const loadCatalog = useOracleStore((s) => s.loadCatalog);
   const hasResult = useOracleStore((s) => s.result !== null);
+  const [engine, setEngine] = useState<EngineStatus | null>(null);
 
   // Chips de sugestão vêm do catálogo curado (fallback estático)
   const suggestions = useMemo(
@@ -87,6 +90,17 @@ export function SearchScreen() {
   useEffect(() => {
     void loadRecent();
     void loadCatalog();
+    let alive = true;
+    fetchEngineStatus()
+      .then((status) => {
+        if (alive) setEngine(status);
+      })
+      .catch(() => {
+        // status é informativo: falha silenciosa
+      });
+    return () => {
+      alive = false;
+    };
   }, [loadRecent, loadCatalog]);
 
   const canAnalyze = input.trim().length >= 2;
@@ -109,7 +123,7 @@ export function SearchScreen() {
           variant="outline"
           className="mb-5 border-amber-400/30 bg-amber-400/5 text-[10px] font-semibold uppercase tracking-[0.25em] text-amber-300/90"
         >
-          HERmenêutica Digital
+          Hermenêutica Digital
         </Badge>
         <h1 className="oracle-title max-w-3xl font-serif text-4xl font-bold leading-tight md:text-6xl">
           Oráculo das Conexões Narrativas
@@ -238,6 +252,31 @@ export function SearchScreen() {
           ) : null}
         </CardContent>
       </Card>
+
+      {/* Selo de motor / transparência operacional */}
+      {engine ? (
+        engine.engine === "local" ? (
+          <div className="mt-5 flex w-full max-w-2xl items-start gap-2.5 rounded-lg border border-emerald-400/25 bg-emerald-400/5 px-3.5 py-2.5">
+            <FlaskConical className="mt-0.5 size-4 shrink-0 text-emerald-400" aria-hidden="true" />
+            <p className="text-xs leading-relaxed text-emerald-200/90">
+              <strong className="font-semibold">Modo demonstração local</strong> — sem chave de
+              LLM conectada, o Oráculo usa o motor hermenêutico determinístico sobre{" "}
+              {engine.catalog.narratives} narrativas curadas ({engine.catalog.traditions}{" "}
+              tradições). Configure <code className="text-emerald-100">ORACLE_LLM_BASE_URL</code>{" "}
+              e <code className="text-emerald-100">ORACLE_LLM_API_KEY</code> para ativar as oito
+              lentes generativas.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-5 flex w-full max-w-2xl items-center gap-2.5 rounded-lg border border-indigo-400/25 bg-indigo-500/5 px-3.5 py-2.5">
+            <Cpu className="size-4 shrink-0 text-indigo-400" aria-hidden="true" />
+            <p className="text-xs text-indigo-200/90">
+              Agentes generativos ativos · {engine.provider} ({engine.model}) · perspectivas
+              armazenadas via {engine.store === "prisma" ? "Prisma/SQLite" : "arquivo local"}.
+            </p>
+          </div>
+        )
+      ) : null}
 
       {/* Análises recentes */}
       {recent.length > 0 ? (
