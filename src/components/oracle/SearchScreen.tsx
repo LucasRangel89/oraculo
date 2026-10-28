@@ -136,7 +136,7 @@ export function SearchScreen() {
       </section>
 
       {/* Card de busca */}
-      <Card className="w-full max-w-2xl border-slate-800 bg-slate-900/60 shadow-[0_0_60px_-15px_rgba(99,102,241,0.25)]">
+      <Card className="w-full max-w-2xl border-slate-800 bg-slate-900/60 py-0 shadow-[0_0_60px_-15px_rgba(99,102,241,0.25)]">
         <CardContent className="p-5 md:p-6">
           <form
             onSubmit={(e) => {
@@ -333,7 +333,7 @@ export function SearchScreen() {
             return (
               <Card
                 key={item.step}
-                className="border-slate-800/80 bg-slate-900/40 transition-colors hover:border-slate-700"
+                className="border-slate-800/80 bg-slate-900/40 py-0 transition-colors hover:border-slate-700"
               >
                 <CardContent className="flex gap-3.5 p-4">
                   <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-indigo-400/30 bg-indigo-500/10">

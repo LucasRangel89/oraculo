@@ -186,7 +186,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
       </p>
 
       {/* Estrutura */}
-      <Card className="border-slate-800 bg-slate-950/40">
+      <Card className="border-slate-800 bg-slate-950/40 py-0">
         <CardContent className="space-y-3 p-4">
           <h3 className="flex items-center gap-2 font-serif text-lg text-slate-100">
             <Layers className="size-4 text-indigo-300" aria-hidden="true" />
@@ -259,7 +259,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Arquétipos */}
-        <Card className="border-slate-800 bg-slate-950/40">
+        <Card className="border-slate-800 bg-slate-950/40 py-0">
           <CardContent className="space-y-2.5 p-4">
             <h3 className="flex items-center gap-2 font-serif text-lg text-slate-100">
               <Compass className="size-4 text-amber-300" aria-hidden="true" />
@@ -292,7 +292,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
         </Card>
 
         {/* Símbolos */}
-        <Card className="border-slate-800 bg-slate-950/40">
+        <Card className="border-slate-800 bg-slate-950/40 py-0">
           <CardContent className="space-y-2.5 p-4">
             <h3 className="flex items-center gap-2 font-serif text-lg text-slate-100">
               <Sparkles className="size-4 text-indigo-300" aria-hidden="true" />
@@ -321,7 +321,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
         </Card>
 
         {/* Temas */}
-        <Card className="border-slate-800 bg-slate-950/40">
+        <Card className="border-slate-800 bg-slate-950/40 py-0">
           <CardContent className="space-y-2.5 p-4">
             <h3 className="flex items-center gap-2 font-serif text-lg text-slate-100">
               <BookOpen className="size-4 text-indigo-300" aria-hidden="true" />
@@ -363,7 +363,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
         </Card>
 
         {/* Psicanálise */}
-        <Card className="border-slate-800 bg-slate-950/40">
+        <Card className="border-slate-800 bg-slate-950/40 py-0">
           <CardContent className="space-y-2.5 p-4">
             <h3 className="flex items-center gap-2 font-serif text-lg text-slate-100">
               <CircleDot className="size-4 text-violet-300" aria-hidden="true" />
@@ -404,7 +404,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
         </Card>
 
         {/* Cultural */}
-        <Card className="border-slate-800 bg-slate-950/40 lg:col-span-2">
+        <Card className="border-slate-800 bg-slate-950/40 py-0 lg:col-span-2">
           <CardContent className="space-y-2.5 p-4">
             <h3 className="flex items-center gap-2 font-serif text-lg text-slate-100">
               <Landmark className="size-4 text-amber-300" aria-hidden="true" />
@@ -503,7 +503,7 @@ function DossiersSection() {
             local, a análise de uma dessas narrativas retorna exatamente este conteúdo.
           </p>
         </nav>
-        <Card className="border-slate-800 bg-slate-900/50">
+        <Card className="border-slate-800 bg-slate-900/50 py-0">
           <CardContent className="p-4 md:p-5">
             {dossier ? <DossierDetail dossier={dossier} /> : null}
           </CardContent>
@@ -560,7 +560,7 @@ function PromptsSection() {
           const Icon = AGENT_ICON[spec.agentId];
           const open = openId === spec.agentId;
           return (
-            <Card key={spec.agentId} className="border-slate-800 bg-slate-900/50">
+            <Card key={spec.agentId} className="border-slate-800 bg-slate-900/50 py-0">
               <button
                 type="button"
                 onClick={() => setOpenId(open ? null : spec.agentId)}
@@ -644,7 +644,7 @@ function CollectionCard({
   const hidden = items.length - shown.length;
 
   return (
-    <Card className={`border bg-slate-900/40 ${accentClass}`}>
+    <Card className={`border bg-slate-900/40 py-0 ${accentClass}`}>
       <CardContent className="p-4">
         <div className="mb-1 flex items-start justify-between gap-2">
           <h3 className="font-serif text-lg font-semibold text-slate-100">{title}</h3>
@@ -792,7 +792,7 @@ function ExtractionSection() {
 
         <div className="space-y-2">
           {items.map((item) => (
-            <Card key={item.id} className="border-slate-800 bg-slate-900/40">
+            <Card key={item.id} className="border-slate-800 bg-slate-900/40 py-0">
               <CardContent className="flex flex-col gap-1.5 p-3.5 sm:flex-row sm:items-start sm:gap-4">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-slate-100">{item.capability}</p>
@@ -819,7 +819,7 @@ function ExtractionSection() {
         />
         <div className="grid gap-3 md:grid-cols-2">
           {LEGACY_DOCUMENTS.map((doc) => (
-            <Card key={doc.id} className="border-slate-800 bg-slate-900/40">
+            <Card key={doc.id} className="border-slate-800 bg-slate-900/40 py-0">
               <CardContent className="space-y-2 p-4">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="font-serif text-base font-semibold leading-snug text-slate-100">
