@@ -298,7 +298,7 @@ A escolha acontece em tempo de build: `oracle-client.ts` detecta `NEXT_PUBLIC_OR
 
 **Deploy automático.** `.github/workflows/deploy-pages.yml` roda a cada push na `main`: instala, checa tipos, gera o export, roda `verify:pages` e publica. O subcaminho (`/oraculo`) é calculado a partir do nome do repositório — repositórios `<user>.github.io` são servidos na raiz.
 
-> **Ativar uma vez:** em *Settings → Pages*, defina **Source = GitHub Actions**. (O workflow também pode ser disparado manualmente em *Actions → Deploy no GitHub Pages → Run workflow*.)
+> **Ativar uma vez:** em [Settings → Pages](https://github.com/LucasRangel89/oraculo/settings/pages), defina **Source = GitHub Actions**. Enquanto isso não é feito, o workflow roda build e verificação normalmente (fica verde), guarda o artefato \`out/\` no run e avisa no log — apenas a publicação é ignorada. Depois de ativar, rode em *Actions → Deploy no GitHub Pages → Run workflow*.
 
 **Limitações honestas da edição estática.** O histórico fica no navegador (não sincroniza entre dispositivos); não há análise generativa por LLM; e cada visitante baixa o catálogo curado junto com a página (~1,2 MB de JS). Em troca, não há servidor, custo por análise, latência de rede nem chave de API exposta.
 

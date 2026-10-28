@@ -224,6 +224,19 @@ const scan = scanChunks(path.join(outDir, "_next", "static", "chunks"));
 check(scan.files > 0, "chunks publicados", `${scan.files} arquivos`);
 check(scan.forbidden.length === 0, "sem código de servidor no bundle", scan.forbidden.join(", "));
 
+// O bundle publicado não pode conter chamadas de rede: se `IS_STATIC` não for
+// inlinado como `true`, o dispatcher mantém os `fetch("/api/...")` e a página
+// publicada quebraria em 404. Este é o teste de regressão dessa decisão.
+const apiStrings = [];
+for (const entry of readdirSync(path.join(outDir, "_next", "static", "chunks"))) {
+  if (!entry.endsWith(".js")) continue;
+  const code = readFileSync(path.join(outDir, "_next", "static", "chunks", entry), "utf8");
+  for (const api of ["/api/analyze", "/api/status", "/api/catalog", "/api/compare"]) {
+    if (code.includes(`"${api}"`)) apiStrings.push(`${entry} → ${api}`);
+  }
+}
+check(apiStrings.length === 0, "nenhuma chamada /api no bundle estático", apiStrings.join(", "));
+
 const engineChunk = readdirSync(path.join(outDir, "_next", "static", "chunks")).some((f) => {
   if (!f.endsWith(".js")) return false;
   return readFileSync(path.join(outDir, "_next", "static", "chunks", f), "utf8").includes(
