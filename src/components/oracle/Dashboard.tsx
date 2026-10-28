@@ -488,11 +488,11 @@ export function Dashboard() {
     <div className="space-y-4">
       <FactsCard result={result} />
       <SummaryCard result={result} />
-      <div className="grid gap-4 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)_minmax(280px,370px)]">
+      <div className="grid items-start gap-4 xl:grid-cols-[minmax(300px,380px)_minmax(0,1fr)]">
         <ParallelsList result={result} onSelect={(c) => handleSelectConnection(c.name, c.origin)} />
         <NarrativeGraph result={result} onSelect={handleSelectConnection} />
-        <AgentPanels result={result} />
       </div>
+      <AgentPanels result={result} />
       <ActionBar result={result} />
     </div>
   );

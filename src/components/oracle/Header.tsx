@@ -42,7 +42,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-800/60 bg-slate-950/70 backdrop-blur supports-[backdrop-filter]:bg-slate-950/60">
-      <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-3 md:gap-5">
+      <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 md:flex-nowrap md:gap-5 md:py-3">
         <button
           type="button"
           onClick={() => setTab("analise")}
@@ -61,7 +61,7 @@ export function Header() {
         </button>
 
         <nav
-          className="ml-auto flex items-center gap-1 rounded-lg border border-slate-800/80 bg-slate-900/60 p-1"
+          className="order-3 -mx-1 flex w-[calc(100%+0.5rem)] items-center gap-1 overflow-x-auto rounded-lg border border-slate-800/80 bg-slate-900/60 p-1 oracle-scroll md:order-none md:mx-0 md:ml-auto md:w-auto md:overflow-visible"
           aria-label="Navegação principal"
         >
           {TABS.map((t) => {
@@ -72,7 +72,7 @@ export function Header() {
                 type="button"
                 onClick={() => setTab(t.id)}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60 sm:px-3.5 sm:text-sm ${
+                className={`shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60 sm:px-3.5 sm:text-sm ${
                   active
                     ? "bg-indigo-500/15 text-indigo-200 shadow-[inset_0_0_0_1px_rgba(129,140,248,0.35)]"
                     : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
@@ -101,7 +101,7 @@ export function Header() {
           rel="noopener noreferrer"
           aria-label="Repositório do Oráculo no GitHub"
           title="Repositório no GitHub"
-          className="rounded-md p-2 text-slate-400 transition-colors outline-none hover:bg-slate-800/60 hover:text-slate-200 focus-visible:ring-2 focus-visible:ring-indigo-400/60"
+          className="ml-auto rounded-md p-2 text-slate-400 transition-colors outline-none hover:bg-slate-800/60 hover:text-slate-200 focus-visible:ring-2 focus-visible:ring-indigo-400/60 md:ml-0"
         >
           <Github className="size-5" aria-hidden="true" />
         </a>

@@ -354,11 +354,21 @@ export function NarrativeGraph({ result, onSelect }: NarrativeGraphProps) {
         const node = nodes.find((n) => n.id === id);
         const rect = containerRef.current.getBoundingClientRect();
         if (node) {
-          setTooltip({
-            node,
-            x: Math.min(e.clientX - rect.left + 14, Math.max(rect.width - 260, 0)),
-            y: e.clientY - rect.top + 14,
-          });
+          // Posiciona o cartão dentro da caixa do grafo: vira para a esquerda
+          // ou para cima quando não há espaço, em vez de estourar o container.
+          const TOOLTIP_W = 250;
+          const TOOLTIP_H = 104;
+          const localX = e.clientX - rect.left;
+          const localY = e.clientY - rect.top;
+          const x =
+            localX + 14 + TOOLTIP_W > rect.width - 8
+              ? Math.max(localX - TOOLTIP_W - 14, 8)
+              : localX + 14;
+          const y =
+            localY + 14 + TOOLTIP_H > rect.height - 8
+              ? Math.max(localY - TOOLTIP_H - 14, 8)
+              : localY + 14;
+          setTooltip({ node, x, y });
           return;
         }
       }
@@ -451,8 +461,8 @@ export function NarrativeGraph({ result, onSelect }: NarrativeGraphProps) {
   );
 
   return (
-    <Card className="flex h-full flex-col border-slate-800 bg-slate-900/60">
-      <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
+    <Card className="flex flex-col border-slate-800 bg-slate-900/60">
+      <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 space-y-0 pb-3">
         <CardTitle className="flex items-center gap-2 font-serif text-lg text-slate-100">
           <Share2 className="size-4 text-indigo-400" aria-hidden="true" />
           Grafo de Conexões
@@ -581,7 +591,7 @@ export function NarrativeGraph({ result, onSelect }: NarrativeGraphProps) {
 
           {tooltip ? (
             <div
-              className="pointer-events-none absolute z-10 max-w-[250px] rounded-lg border border-indigo-400/30 bg-slate-900/95 p-2.5 text-xs shadow-2xl shadow-black/60"
+              className="pointer-events-none absolute z-20 w-[250px] max-h-[120px] overflow-hidden rounded-lg border border-indigo-400/30 bg-slate-900/95 p-2.5 text-xs shadow-2xl shadow-black/60"
               style={{
                 left: tooltip.x,
                 top: tooltip.y,
@@ -589,7 +599,7 @@ export function NarrativeGraph({ result, onSelect }: NarrativeGraphProps) {
               role="tooltip"
             >
               <p className="font-semibold text-slate-100">{tooltip.node.name}</p>
-              <p className="mt-0.5 text-[10px] uppercase tracking-wide text-slate-500">
+              <p className="mt-0.5 text-[10px] uppercase tracking-wide text-slate-400">
                 {tooltip.node.origin}
               </p>
               {!tooltip.node.isCenter ? (
@@ -603,7 +613,7 @@ export function NarrativeGraph({ result, onSelect }: NarrativeGraphProps) {
             </div>
           ) : null}
         </div>
-        <p className="mt-2 text-center text-[11px] text-slate-500 md:text-left">
+        <p className="mt-2 text-center text-[11px] text-slate-400 md:text-left">
           Arraste para reposicionar · Scroll para zoom · Clique num nó para
           comparação profunda
         </p>

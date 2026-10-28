@@ -110,7 +110,7 @@ Coloque atrás de um reverse proxy (Caddy/Nginx) com HTTPS. Não há allowlist d
 
 - [ ] `/api/status` responde `ok: true`
 - [ ] `engine` é o esperado (`local` em demo, `openai`/`zai` em produção)
-- [ ] `/api/catalog` retorna 24 narrativas
+- [ ] `/api/catalog` retorna o acervo completo (140 narrativas)
 - [ ] uma análise completa emite `start` → `agent_*` → `complete` sem `error`
 - [ ] `/api/analysis/[id]` devolve o payload e `cached: true`
 - [ ] `/api/compare` devolve score e convergências
@@ -163,6 +163,6 @@ Trade-offs: histórico por dispositivo, sem análise generativa e ~1,2 MB de JS 
 
 ## 7. Custos e limites
 
-- **Modo local:** zero chamadas externas. Uma análise completa é O(n) sobre 24 narrativas — poucos milissegundos.
+- **Modo local:** zero chamadas externas. Uma análise completa é O(n) sobre 140 narrativas — poucos milissegundos.
 - **Modo LLM:** 1 chamada para `facts`, 6 em paralelo (stagger de 350 ms), 1 para `parallels` e 1 para o resumo. O código já trata `429` com backoff (5 s/15 s/30 s) e reduz rajadas.
 - Para produção multiusuário, adicione **rate limiting por IP/usuário** e cache agressivo por `normalizedInput` (já implementado no repositório).

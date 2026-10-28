@@ -112,7 +112,7 @@ export function DocsTab() {
           busca de estruturas de missão universais; e qualquer narrador curioso.
         </p>
         <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             O fluxo em três movimentos
           </p>
           <ol className="space-y-1.5">
@@ -405,10 +405,12 @@ export function DocsTab() {
           <li className="flex gap-2.5">
             <Scale className="mt-0.5 size-4 shrink-0 text-amber-400/80" aria-hidden="true" />
             <span className="text-xs leading-relaxed text-slate-400">
-              <strong className="text-slate-200">Viés de catálogo.</strong> A
-              curadoria inicial privilegia tradições bem documentadas no Ocidente
-              (grega, nórdica, bíblica) mais cultura pop global — estamos
-              expandindo tradições sub-representadas.
+              <strong className="text-slate-200">Viés de catálogo.</strong> O
+              acervo cresceu de 24 para 140 narrativas e 69 tradições — incluindo
+              Índia, Pérsia, China, Japão, Coreia, Vietnã, África Ocidental,
+              povos originários das Américas, Oceania e folclore brasileiro — mas
+              a tradição greco-romana ainda ocupa 16 entradas e a documentação
+              escrita continua super-representada em relação à oralidade.
             </span>
           </li>
           <li className="flex gap-2.5">
@@ -440,7 +442,7 @@ export function DocsTab() {
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
-            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
               Motor
             </p>
             <p className="text-xs leading-relaxed text-slate-400">
@@ -453,7 +455,7 @@ export function DocsTab() {
             </p>
           </div>
           <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
-            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
               Persistência
             </p>
             <p className="text-xs leading-relaxed text-slate-400">
@@ -484,7 +486,7 @@ export function DocsTab() {
         </p>
       </Section>
 
-      <p className="flex items-center justify-center gap-2 py-6 text-center text-xs text-slate-600">
+      <p className="flex items-center justify-center gap-2 py-6 text-center text-xs text-slate-500">
         <Sparkles className="size-3.5 text-amber-400/50" aria-hidden="true" />
         Construído para quem acredita que toda história nova é um eco antigo.
         <Sparkles className="size-3.5 text-amber-400/50" aria-hidden="true" />

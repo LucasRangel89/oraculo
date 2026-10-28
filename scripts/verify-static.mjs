@@ -71,10 +71,14 @@ try {
 }
 
 if (engine) {
+  let catalogTotal = 0;
   // 1.1 Catálogo
   try {
     const catalog = await engine.fetchCatalogStatic();
-    check(catalog.total === 24, "catálogo completo", `${catalog.total} narrativas`);
+    catalogTotal = catalog.total;
+    check(catalog.total >= 120, "catálogo amplo", `${catalog.total} narrativas`);
+    const origins = new Set(catalog.entries.map((e) => e.origin));
+    check(origins.size >= 40, "acervo multicultural", `${origins.size} origens`);
     const filtered = await engine.fetchCatalogStatic("", "mito");
     check(filtered.entries.every((e) => e.type === "mito"), "filtro por tipo", `${filtered.total} mitos`);
     const searched = await engine.fetchCatalogStatic("trickster");
@@ -87,7 +91,7 @@ if (engine) {
   try {
     const status = await engine.fetchEngineStatusStatic();
     check(status.engine === "local" && status.store === "browser", "status declarado", `${status.engine}/${status.store}`);
-    check(status.catalog.narratives === 24, "status traz o catálogo", `${status.catalog.narratives}`);
+    check(status.catalog.narratives === catalogTotal, "status traz o catálogo", `${status.catalog.narratives}`);
   } catch (err) {
     bad("status", err.message);
   }

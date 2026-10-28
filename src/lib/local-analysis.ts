@@ -939,7 +939,133 @@ const TRADITION_CONTEXT: { match: RegExp; data: TraditionContext }[] = [
     },
   },
   {
-    match: /cinema|literatura contempor|graphic novel|ficção/i,
+    match: /persa|p.rsi|árabe|arabe|sufi|isl.m/i,
+    data: {
+      context:
+        "As narrativas persas e árabes que chegaram ao acervo passam pelo Shahnameh de Firdusi (c. 1010), pela poesia mística de Attar e pela tradição do amor cortês beduíno. São textos de fronteira: preservam cosmogonias zoroastrianas dentro de uma moldura islâmica e fazem da linguagem poética o principal veículo de filosofia.",
+      influences: [
+        "Shahnameh e a epopeia nacional persa",
+        "Sufismo e poesia mística (Attar, Rumi)",
+        "Tradição oral dos contadores (naqqāl)",
+        "Recepção europeia via Orientalismo",
+      ],
+      tensions: [
+        "Livre-arbítrio e decreto divino",
+        "Tirania legitimada contra legitimidade conquistada",
+        "Amor humano como metáfora do divino",
+      ],
+    },
+  },
+  {
+    match: /brasileir|afro-brasileir|guarani|tupi/i,
+    data: {
+      context:
+        "As narrativas brasileiras combinam cosmologias indígenas, matrizes africanas e a literatura de um país que se pensou como projeto europeu nos trópicos. Folclore, romance e canção funcionam aqui como arquivo de tensões raciais e sociais que a história oficial preferiu silenciar.",
+      influences: [
+        "Cosmologias tupi-guarani e iorubá",
+        "Registros jesuíticos e crônicas coloniais",
+        "Romantismo indianista e modernismo",
+        "Tradição oral e cultura popular nordestina",
+      ],
+      tensions: [
+        "Tradição oral contra arquivo escrito",
+        "Mestiçagem como mito e como violência",
+        "Idealização do povo e exclusão real",
+      ],
+    },
+  },
+  {
+    match: /latino-american|hispano|maya|maia|asteca|inca|andina/i,
+    data: {
+      context:
+        "As narrativas latino-americanas que o acervo reúne vão das crônicas maias do Popol Vuh ao realismo mágico do século XX. Todas lidam com o mesmo problema: contar um mundo cuja experiência não cabe nas formas narrativas herdadas da Europa.",
+      influences: [
+        "Popol Vuh e crônicas indígenas coloniais",
+        "Tradição oral andina e amazônica",
+        "Boom latino-americano e realismo mágico",
+        "Teologia da libertação e crítica pós-colonial",
+      ],
+      tensions: [
+        "Tempo cíclico contra tempo linear",
+        "Conquista e sobrevivência cultural",
+        "Mito comunitário e voz individual",
+      ],
+    },
+  },
+  {
+    match: /eslav|russo|polon|tchec|b.ltic/i,
+    data: {
+      context:
+        "O material eslavo chega por compilações tardias: Afanásiev no século XIX, crônicas medievais e a tradição dos byliny cantados. Muita coisa sobreviveu em forma de conto de fadas, o que fez a tradição ser lida por folcloristas antes de ser lida como mitologia.",
+      influences: [
+        "Contos de Afanásiev e compilações folclóricas",
+        "Crônicas medievais e hagiografia",
+        "Byliny e cantos épicos eslavos",
+        "Recepção romântica e nacionalista",
+      ],
+      tensions: [
+        "Cristianismo sobrevivendo ao paganismo",
+        "Fronteira entre a aldeia e a floresta",
+        "Destino e obediência ao mais velho",
+      ],
+    },
+  },
+  {
+    match: /polin.si|maori|havaian|pac.fic|abor.gen/i,
+    data: {
+      context:
+        "As tradições do Pacífico são orais e performáticas: genealogias cantadas, navegação estelar e relatos que só fazem sentido dentro de uma comunidade que os recita. A colonização transformou essas narrativas em 'mitos' justamente quando lhes negava a condição de história.",
+      influences: [
+        "Genealogias e cantos rituais polinésios",
+        "Navegação de longa distância e conhecimento estelar",
+        "Registros missionários e etnográficos",
+        "Renascimento cultural e línguas nativas",
+      ],
+      tensions: [
+        "Oralidade contra arquivo colonial",
+        "Terra e mar como parentes, não recursos",
+        "Trickster como legislador e transgressor",
+      ],
+    },
+  },
+  {
+    match: /nativo|norte-americ|inuit|iroques|anishinaabe|algonquin|lakota|navajo/i,
+    data: {
+      context:
+        "As narrativas nativas norte-americanas que o acervo recolhe pertencem a nações distintas, com línguas e cosmologias próprias. Muitas só podem ser contadas em certas estações e por pessoas autorizadas — o que torna qualquer antologia impressa já uma tradução política.",
+      influences: [
+        "Tradição oral de nações algonquinas, iroquesas e sioux",
+        "Ciclos do trickster Coiote",
+        "Etnografia do século XIX e XX",
+        "Literatura indígena contemporânea",
+      ],
+      tensions: [
+        "Narrativa como propriedade comunitária",
+        "Sobrevivência após genocídio e remoção",
+        "Animais como pessoas, não símbolos",
+      ],
+    },
+  },
+  {
+    match: /chin|china|corean|vietnam|joseon/i,
+    data: {
+      context:
+        "As narrativas do leste asiático circulam entre clássicos canônicos, romances de dinastia, teatro e tradição oral. Há um fundo compartilhado — budismo, confucionismo e taoísmo — mas cada tradição nacional reorganiza esse fundo segundo sua própria política de gênero e de classe.",
+      influences: [
+        "Clássicos chineses e romances de dinastia",
+        "Budismo, taoísmo e confucionismo",
+        "Pansori e teatro popular coreano",
+        "Folclore vietnamita e crônicas locais",
+      ],
+      tensions: [
+        "Dever filial contra desejo individual",
+        "Hierarquia confuciana e mobilidade social",
+        "Ordem cósmica e catástrofe natural",
+      ],
+    },
+  },
+  {
+    match: /cinema|literatura contempor|graphic novel|ficção|anima|mang.|quadrinho|s.rie\(/i,
     data: {
       context:
         "A obra pertence a um repertório popular de massas: cinema, literatura de gênero e quadrinhos são formas industriais, distribuídas globalmente e imediatamente absorvidas pelo mercado e pelo fandom. Essa circulação molda tanto a estrutura (três atos, franquias) quanto a recepção.",
@@ -964,7 +1090,7 @@ function buildCultural(entry: CatalogEntry, facts: NarrativeFacts): CulturalAnal
     TRADITION_CONTEXT[TRADITION_CONTEXT.length - 1].data;
 
   const sameTradition = CATALOG.filter(
-    (o) => o.id !== entry.id && normalizeText(o.origin).split(" ")[1] === normalizeText(entry.origin).split(" ")[1]
+    (o) => o.id !== entry.id && normalizeText(o.origin) === normalizeText(entry.origin)
   )
     .slice(0, 3)
     .map((o) => o.name);

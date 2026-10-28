@@ -205,7 +205,7 @@ Antes desta iteração, o produto já entregava:
 | Capacidade | Onde | Observação |
 |---|---|---|
 | 7 lentes em paralelo via SSE | `src/lib/oracle-agents.ts`, `src/app/api/analyze/route.ts` | facts sequencial + 5 em paralelo + comparativo |
-| Catálogo curado de 24 narrativas | `src/lib/oracle-catalog.ts` | 17 tradições, 87 motivos, 13 arquétipos, 92 temas |
+| Catálogo curado de 24 narrativas | `src/lib/oracle-catalog.ts` | 17 tradições, 87 motivos, 13 arquétipos, 92 temas — **atualizado: 140 narrativas em 69 tradições, 185 motivos, 28 arquétipos e 443 temas** (ver `src/lib/catalog/`) |
 | Fingerprint + similaridade | `src/lib/similarity.ts` | matching por tokens, pesos fixos |
 | Grafo force-directed em SVG | `src/components/oracle/NarrativeGraph.tsx` | drag, pan/zoom, export PNG |
 | Comparação lado a lado | `src/app/api/compare/route.ts`, `ComparisonModal.tsx` | convergências por categoria |

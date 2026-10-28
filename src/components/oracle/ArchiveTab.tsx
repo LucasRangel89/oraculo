@@ -226,7 +226,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
           </div>
           <Separator className="bg-slate-800/70" />
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
               Jornada do herói (Campbell)
             </p>
             <ul className="grid gap-1.5 sm:grid-cols-2">
@@ -247,7 +247,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
                     />
                     {stage.stage}
                   </span>
-                  <span className="mt-0.5 block leading-relaxed text-[11px] text-slate-500">
+                  <span className="mt-0.5 block leading-relaxed text-[11px] text-slate-400">
                     {stage.evidence}
                   </span>
                 </li>
@@ -278,7 +278,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
                       {item.archetype}
                     </Badge>
                   </p>
-                  <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500">
+                  <p className="mt-0.5 text-[11px] leading-relaxed text-slate-400">
                     {item.description}
                   </p>
                 </li>
@@ -304,13 +304,13 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
                 <li key={symbol.symbol} className="rounded-md border border-slate-800 bg-slate-900/40 p-2">
                   <p className="flex items-center justify-between text-xs font-medium text-slate-200">
                     {symbol.symbol}
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400">
                       {symbol.presence}
                     </span>
                   </p>
-                  <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500">{symbol.meaning}</p>
+                  <p className="mt-0.5 text-[11px] leading-relaxed text-slate-400">{symbol.meaning}</p>
                   {symbol.historicalParallels.length > 0 ? (
-                    <p className="mt-1 text-[10px] text-slate-600">
+                    <p className="mt-1 text-[10px] text-slate-400">
                       também em: {symbol.historicalParallels.join(" · ")}
                     </p>
                   ) : null}
@@ -340,7 +340,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
               ))}
             </div>
             <div className="space-y-1">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                 Questões existenciais
               </p>
               {themes.existentialQuestions.map((question) => (
@@ -350,7 +350,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
               ))}
             </div>
             <div className="space-y-1">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                 Dilemas éticos
               </p>
               {themes.ethicalDilemmas.map((dilemma) => (
@@ -385,7 +385,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
               ))}
             </div>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                 Freud
               </p>
               <p className="text-[11px] leading-relaxed text-slate-400">
@@ -393,7 +393,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
               </p>
             </div>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                 Jung
               </p>
               <p className="text-[11px] leading-relaxed text-slate-400">
@@ -420,7 +420,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
             <p className="text-xs leading-relaxed text-slate-400">{cultural.historicalContext}</p>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                   Influências e linhagens
                 </p>
                 <ul className="mt-1 space-y-0.5">
@@ -432,7 +432,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
                 </ul>
               </div>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                   Valores e tensões
                 </p>
                 <ul className="mt-1 space-y-0.5">
@@ -492,13 +492,13 @@ function DossiersSection() {
                     aria-hidden="true"
                   />
                 </span>
-                <span className="mt-0.5 block text-[11px] leading-tight text-slate-500">
+                <span className="mt-0.5 block text-[11px] leading-tight text-slate-400">
                   {item.facts.origin}
                 </span>
               </button>
             );
           })}
-          <p className="mt-1 hidden rounded-lg border border-slate-800/70 bg-slate-950/30 p-2.5 text-[10px] leading-relaxed text-slate-500 lg:block">
+          <p className="mt-1 hidden rounded-lg border border-slate-800/70 bg-slate-950/30 p-2.5 text-[10px] leading-relaxed text-slate-400 lg:block">
             Dossiês são <span className="text-slate-400">ground truth</span>: no modo
             local, a análise de uma dessas narrativas retorna exatamente este conteúdo.
           </p>
@@ -575,14 +575,14 @@ function PromptsSection() {
                     <span className="font-serif text-base font-semibold text-slate-100">
                       {spec.persona}
                     </span>
-                    <span className="text-[11px] uppercase tracking-wider text-slate-500">
+                    <span className="text-[11px] uppercase tracking-wider text-slate-400">
                       {AGENT_LABELS[spec.agentId]}
                     </span>
                   </span>
                   <span className="mt-0.5 block text-xs leading-relaxed text-slate-400">
                     {spec.deliverable}
                   </span>
-                  <span className="mt-1 block text-[11px] text-slate-600">{spec.theory}</span>
+                  <span className="mt-1 block text-[11px] text-slate-400">{spec.theory}</span>
                 </span>
                 <ChevronRight
                   className={`mt-1 size-4 shrink-0 text-slate-500 transition-transform ${
@@ -594,7 +594,7 @@ function PromptsSection() {
               {open ? (
                 <div className="border-t border-slate-800/70 px-4 py-3">
                   <div className="mb-2 flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                       Prompt de sistema
                     </span>
                     <Button
@@ -624,6 +624,76 @@ function PromptsSection() {
 // Coleções temáticas
 // ---------------------------------------------------------------------------
 
+const COLLECTION_PREVIEW = 12;
+
+function CollectionCard({
+  title,
+  subtitle,
+  accentClass,
+  items,
+  onOpen,
+}: {
+  title: string;
+  subtitle: string;
+  accentClass: string;
+  items: { id: string; name: string }[];
+  onOpen: (name: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const shown = expanded ? items : items.slice(0, COLLECTION_PREVIEW);
+  const hidden = items.length - shown.length;
+
+  return (
+    <Card className={`border bg-slate-900/40 ${accentClass}`}>
+      <CardContent className="p-4">
+        <div className="mb-1 flex items-start justify-between gap-2">
+          <h3 className="font-serif text-lg font-semibold text-slate-100">{title}</h3>
+          <Badge
+            variant="outline"
+            className="shrink-0 border-slate-700 bg-slate-950/50 font-mono text-[10px] text-slate-400"
+          >
+            {items.length}
+          </Badge>
+        </div>
+        <p className="text-xs leading-relaxed text-slate-400">{subtitle}</p>
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          {shown.map((entry) => (
+            <button
+              key={entry.id}
+              type="button"
+              onClick={() => onOpen(entry.name)}
+              title={`Analisar ${entry.name}`}
+              className="group inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-950/50 px-2.5 py-1 text-[11px] text-slate-300 transition-colors outline-none hover:border-indigo-400/50 hover:bg-indigo-500/10 hover:text-indigo-100 focus-visible:ring-2 focus-visible:ring-indigo-400/60"
+            >
+              {entry.name}
+              <ArrowRight
+                className="size-3 text-slate-600 group-hover:text-indigo-300"
+                aria-hidden="true"
+              />
+            </button>
+          ))}
+          {items.length === 0 ? (
+            <span className="text-[11px] text-slate-400">
+              Nenhuma narrativa desta coleção no catálogo atual.
+            </span>
+          ) : null}
+        </div>
+        {items.length > COLLECTION_PREVIEW ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            className="mt-3 h-7 px-2 text-[11px] text-indigo-300 hover:bg-indigo-500/10 hover:text-indigo-200"
+          >
+            {expanded ? "Mostrar menos" : `Ver as outras ${hidden} narrativas`}
+          </Button>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
 function CollectionsSection() {
   const openInOracle = useOpenInOracle();
   const entries = useMemo(
@@ -642,49 +712,16 @@ function CollectionsSection() {
         title="Coleções temáticas"
         description="Curadoria derivada do catálogo por motivo, arquétipo e tema — a materialização do item 'Coleções Temáticas' do blueprint Explorador."
       />
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid items-start gap-4 md:grid-cols-2">
         {entries.map(({ collection, items }) => (
-          <Card
+          <CollectionCard
             key={collection.id}
-            className={`border bg-slate-900/40 ${ACCENT[collection.accent] ?? ACCENT.indigo}`}
-          >
-            <CardContent className="p-4">
-              <div className="mb-1 flex items-start justify-between gap-2">
-                <h3 className="font-serif text-lg font-semibold text-slate-100">
-                  {collection.title}
-                </h3>
-                <Badge
-                  variant="outline"
-                  className="shrink-0 border-slate-700 bg-slate-950/50 font-mono text-[10px] text-slate-400"
-                >
-                  {items.length}
-                </Badge>
-              </div>
-              <p className="text-xs leading-relaxed text-slate-400">{collection.subtitle}</p>
-              <div className="mt-2.5 flex flex-wrap gap-1.5">
-                {items.map((entry) => (
-                  <button
-                    key={entry.id}
-                    type="button"
-                    onClick={() => openInOracle(entry.name)}
-                    title={`Analisar ${entry.name}`}
-                    className="group inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-950/50 px-2.5 py-1 text-[11px] text-slate-300 transition-colors hover:border-indigo-400/50 hover:bg-indigo-500/10 hover:text-indigo-100"
-                  >
-                    {entry.name}
-                    <ArrowRight
-                      className="size-3 text-slate-600 group-hover:text-indigo-300"
-                      aria-hidden="true"
-                    />
-                  </button>
-                ))}
-                {items.length === 0 ? (
-                  <span className="text-[11px] text-slate-600">
-                    Nenhuma narrativa desta coleção no catálogo atual.
-                  </span>
-                ) : null}
-              </div>
-            </CardContent>
-          </Card>
+            title={collection.title}
+            subtitle={collection.subtitle}
+            accentClass={ACCENT[collection.accent] ?? ACCENT.indigo}
+            items={items}
+            onOpen={openInOracle}
+          />
         ))}
       </div>
     </div>
@@ -725,7 +762,7 @@ function ExtractionSection() {
               className="rounded-lg border border-slate-800 bg-slate-900/40 px-3 py-2"
             >
               <p className="font-serif text-xl font-bold text-slate-100">{stat.value}</p>
-              <p className="text-[10px] uppercase tracking-wider text-slate-500">{stat.label}</p>
+              <p className="text-[10px] uppercase tracking-wider text-slate-400">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -747,7 +784,7 @@ function ExtractionSection() {
                 }`}
               >
                 {option === "todos" ? "todos" : STATUS_LABEL[option]}
-                <span className="ml-1.5 font-mono text-[10px] text-slate-500">{count}</span>
+                <span className="ml-1.5 font-mono text-[10px] text-slate-400">{count}</span>
               </button>
             );
           })}
@@ -759,7 +796,7 @@ function ExtractionSection() {
               <CardContent className="flex flex-col gap-1.5 p-3.5 sm:flex-row sm:items-start sm:gap-4">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-slate-100">{item.capability}</p>
-                  <p className="mt-0.5 text-[11px] text-slate-500">{item.provenance}</p>
+                  <p className="mt-0.5 text-[11px] text-slate-400">{item.provenance}</p>
                   <p className="mt-1 text-xs leading-relaxed text-slate-400">{item.decision}</p>
                 </div>
                 <Badge
@@ -795,13 +832,13 @@ function ExtractionSection() {
                     {doc.size}
                   </Badge>
                 </div>
-                <p className="text-[11px] leading-relaxed text-slate-500">
+                <p className="text-[11px] leading-relaxed text-slate-400">
                   <FileText className="mr-1 inline size-3 align-text-bottom" aria-hidden="true" />
                   {doc.file}
                 </p>
                 <p className="text-xs leading-relaxed text-slate-400">{doc.value}</p>
                 <div>
-                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                     Aproveitado
                   </p>
                   <ul className="space-y-0.5">
@@ -849,7 +886,7 @@ export function ArchiveTab() {
           convertidos em produto: uma oitava lente, quatro dossiês de referência,
           um motor local, uma biblioteca de prompts e um mapa de rastreabilidade.
         </p>
-        <div className="mt-3 flex flex-wrap gap-1.5 text-[11px] text-slate-500">
+        <div className="mt-3 flex flex-wrap gap-1.5 text-[11px] text-slate-400">
           <span className="rounded-full border border-slate-800 bg-slate-900/50 px-2.5 py-1">
             {stats.narratives} narrativas · {stats.traditions} tradições
           </span>
