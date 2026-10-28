@@ -207,3 +207,44 @@
 .oracle-gold {
   animation: oracle-gold 3s ease-in-out infinite;
 }
+
+/* ==========================================================================
+   Acessibilidade — foco visível em elementos SVG e respeito a preferências
+   ========================================================================== */
+
+/* Nós do grafo: `outline` não é confiável em SVG, então o foco é desenhado
+   como um halo na própria cor do tema. */
+.oracle-node {
+  outline: none;
+}
+.oracle-node:focus {
+  outline: none;
+}
+.oracle-node:focus-visible circle {
+  stroke: #f8fafc;
+  stroke-width: 3;
+}
+.oracle-node:focus-visible text {
+  fill: #f8fafc;
+  text-decoration: underline;
+}
+.oracle-node:focus:not(:focus-visible) circle {
+  stroke: #020617;
+}
+
+/* Usuários que pedem menos movimento não recebem animações infinitas
+   (WCAG 2.3.3 e respeito à configuração do sistema). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .oracle-pulse,
+  .oracle-gold {
+    animation: none !important;
+  }
+}

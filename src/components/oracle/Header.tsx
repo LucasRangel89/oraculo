@@ -84,27 +84,32 @@ export function Header() {
           })}
         </nav>
 
-        {view === "result" ? (
-          <Button
-            size="sm"
-            onClick={resetToSearch}
-            className="hidden border-amber-400/40 bg-amber-400/10 text-amber-200 hover:bg-amber-400/20 hover:text-amber-100 md:inline-flex"
-          >
-            <RotateCcw className="size-4" />
-            Nova Análise
-          </Button>
-        ) : null}
+        {/* Ações à direita: agrupadas para não disputarem o `ml-auto` */}
+        <div className="ml-auto flex items-center gap-1.5 md:ml-0">
+          {view === "result" ? (
+            <Button
+              size="sm"
+              onClick={resetToSearch}
+              aria-label="Nova análise"
+              title="Nova análise"
+              className="shrink-0 border-amber-400/40 bg-amber-400/10 text-amber-200 hover:bg-amber-400/20 hover:text-amber-100"
+            >
+              <RotateCcw className="size-4" aria-hidden="true" />
+              <span className="hidden md:inline">Nova Análise</span>
+            </Button>
+          ) : null}
 
-        <a
-          href="https://github.com/LucasRangel89/oraculo"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Repositório do Oráculo no GitHub"
-          title="Repositório no GitHub"
-          className="ml-auto rounded-md p-2 text-slate-400 transition-colors outline-none hover:bg-slate-800/60 hover:text-slate-200 focus-visible:ring-2 focus-visible:ring-indigo-400/60 md:ml-0"
-        >
-          <Github className="size-5" aria-hidden="true" />
-        </a>
+          <a
+            href="https://github.com/LucasRangel89/oraculo"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Repositório do Oráculo no GitHub (abre em nova aba)"
+            title="Repositório no GitHub"
+            className="rounded-md p-2 text-slate-400 transition-colors outline-none hover:bg-slate-800/60 hover:text-slate-200 focus-visible:ring-2 focus-visible:ring-indigo-400/60"
+          >
+            <Github className="size-5" aria-hidden="true" />
+          </a>
+        </div>
       </div>
     </header>
   );

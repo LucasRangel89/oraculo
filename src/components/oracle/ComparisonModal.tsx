@@ -29,7 +29,7 @@ function LoadingSkeleton() {
       </div>
       <Skeleton className="h-28 bg-slate-800" />
       <Skeleton className="h-20 bg-slate-800" />
-      <p className="text-center text-xs text-slate-500">
+      <p className="text-center text-xs text-slate-400">
         O Oráculo está cruzando os fios das duas narrativas...
       </p>
     </div>
@@ -49,7 +49,7 @@ export function ComparisonModal() {
         if (!next) closeComparison();
       }}
     >
-      <DialogContent className="max-h-[90vh] overflow-y-auto border-slate-800 bg-slate-900 oracle-scroll sm:max-w-4xl">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto border-slate-800 bg-slate-900 oracle-scroll sm:max-w-4xl">
         {loading ? (
           <>
             <DialogHeader className="sr-only">
@@ -98,7 +98,7 @@ export function ComparisonModal() {
                 </DialogTitle>
                 <ScoreRing value={data.score} size={80} label="Similaridade" />
               </div>
-              <DialogDescription className="text-xs text-slate-500">
+              <DialogDescription className="text-xs text-slate-400">
                 {data.a.origin} · {data.b.origin}
               </DialogDescription>
             </DialogHeader>
@@ -121,9 +121,9 @@ export function ComparisonModal() {
             {/* Convergências por categoria */}
             {data.convergences.length > 0 ? (
               <section aria-label="Pontos de convergência">
-                <h4 className="mb-2.5 font-serif text-base font-semibold text-slate-100">
+                <h3 className="mb-2.5 font-serif text-base font-semibold text-slate-100">
                   Pontos de Convergência
-                </h4>
+                </h3>
                 <div className="space-y-3">
                   {data.convergences.map((group) => (
                     <div
@@ -160,9 +160,9 @@ export function ComparisonModal() {
             <div className="grid gap-3 md:grid-cols-2">
               {data.differences.length > 0 ? (
                 <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
-                  <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                     Diferenças
-                  </h4>
+                  </h3>
                   <ul className="space-y-1.5">
                     {data.differences.map((diff) => (
                       <li
@@ -170,7 +170,7 @@ export function ComparisonModal() {
                         className="flex items-start gap-2 text-sm text-slate-400"
                       >
                         <Minus
-                          className="mt-0.5 size-4 shrink-0 text-slate-600"
+                          className="mt-0.5 size-4 shrink-0 text-slate-400"
                           aria-hidden="true"
                         />
                         <span className="leading-relaxed">{diff}</span>
@@ -181,9 +181,9 @@ export function ComparisonModal() {
               ) : null}
               {data.sharedSymbols.length > 0 ? (
                 <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
-                  <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                     Símbolos Compartilhados
-                  </h4>
+                  </h3>
                   <div className="flex flex-wrap gap-1.5">
                     {data.sharedSymbols.map((symbol) => (
                       <Badge
@@ -228,7 +228,7 @@ export function ComparisonModal() {
             </blockquote>
 
             <Alert className="border-slate-800 bg-slate-950/40 py-2.5">
-              <AlertDescription className="text-xs text-slate-500">
+              <AlertDescription className="text-xs text-slate-400">
                 {data.disclaimer}
               </AlertDescription>
             </Alert>
@@ -255,7 +255,7 @@ export function ComparisonModal() {
               {artworkLoading ? (
                 <div className="space-y-2" aria-busy="true">
                   <Skeleton className="aspect-[1152/864] w-full rounded-lg bg-slate-800" />
-                  <p className="text-center text-xs text-slate-500">
+                  <p className="text-center text-xs text-slate-400">
                     Pintando o arquétipo compartilhado... (pode levar alguns segundos)
                   </p>
                 </div>

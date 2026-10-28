@@ -155,17 +155,23 @@ function FactsCard({ result }: { result: AnalysisResult }) {
               Narrativa não reconhecida com precisão. Você quis dizer:
             </span>
             {facts.variants.map((variant) => (
-              <Badge
+              <button
                 key={variant}
-                variant="outline"
-                className="cursor-pointer border-amber-400/40 bg-transparent text-amber-200 hover:bg-amber-400/10"
+                type="button"
                 onClick={() => {
                   useOracleStore.getState().setInput(variant);
                   void useOracleStore.getState().startAnalysis();
                 }}
+                className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70"
+                title={`Analisar ${variant}`}
               >
-                {variant}
-              </Badge>
+                <Badge
+                  variant="outline"
+                  className="cursor-pointer border-amber-400/40 bg-transparent text-amber-200 hover:bg-amber-400/10"
+                >
+                  {variant}
+                </Badge>
+              </button>
             ))}
           </div>
         ) : null}
@@ -194,8 +200,8 @@ function SummaryCard({ result }: { result: AnalysisResult }) {
         {result.summary}
       </p>
       <Alert className="mt-4 border-slate-800 bg-slate-950/40 py-2.5">
-        <Info className="size-3.5 text-slate-500" aria-hidden="true" />
-        <AlertDescription className="text-xs text-slate-500">
+        <Info className="size-3.5 text-slate-400" aria-hidden="true" />
+        <AlertDescription className="text-xs text-slate-400">
           {result.engine === "local"
             ? "Interpretação determinística sobre o catálogo curado — hipóteses heurísticas, não fatos. Configure um provedor de LLM para ativar as oito lentes generativas."
             : "Interpretação gerada por IA — hipóteses heurísticas, não fatos."}
@@ -270,7 +276,7 @@ function WeightsDialog() {
                     className="text-sm text-slate-200"
                   >
                     {field.label}
-                    <span className="ml-1.5 text-xs text-slate-500">{field.hint}</span>
+                    <span className="ml-1.5 text-xs text-slate-400">{field.hint}</span>
                   </label>
                   <span className="font-mono text-xs text-indigo-300">{value}%</span>
                 </div>
@@ -288,10 +294,17 @@ function WeightsDialog() {
               </div>
             );
           })}
-          <p className="text-xs text-slate-500">
-            Soma atual: <span className="font-mono text-slate-300">{Math.round(total * 100)}%</span>{" "}
+          <p className="text-xs text-slate-400">
+            Soma atual:{" "}
+            <span className="font-mono text-slate-200">{Math.round(total * 100)}%</span>{" "}
             — a normalização é automática, então não é preciso fechar em 100%.
           </p>
+          {total <= 0 ? (
+            <p role="alert" className="text-xs text-amber-300">
+              Todas as dimensões estão em zero: nenhuma conexão poderia ser
+              calculada. Deixe ao menos uma acima de 0% para recalcular.
+            </p>
+          ) : null}
         </div>
 
         <DialogFooter className="gap-2">
@@ -306,6 +319,8 @@ function WeightsDialog() {
           </Button>
           <Button
             size="sm"
+            disabled={total <= 0}
+            title={total <= 0 ? "Defina ao menos um peso maior que zero" : undefined}
             onClick={() => {
               applyWeights();
               setOpen(false);
@@ -440,7 +455,7 @@ function ActionBar({ result }: { result: AnalysisResult }) {
             onChange={(e) => setComment(e.target.value)}
             placeholder="Ex.: paralelos pouco relevantes, símbolos genéricos..."
             rows={4}
-            className="border-slate-700 bg-slate-950/60 text-slate-200 placeholder:text-slate-600"
+            className="border-slate-700 bg-slate-950/60 text-slate-200 placeholder:text-slate-400"
             aria-label="Comentário sobre a análise"
           />
           <DialogFooter className="gap-2">
@@ -486,6 +501,11 @@ export function Dashboard() {
 
   return (
     <div className="space-y-4">
+      {/* A vista de resultado substitui a busca inteira: sem um h1 a página
+          ficaria sem título de nível 1 para leitores de tela. */}
+      <h1 className="sr-only">
+        Resultado da análise de {result.facts.name}
+      </h1>
       <FactsCard result={result} />
       <SummaryCard result={result} />
       <div className="grid items-start gap-4 xl:grid-cols-[minmax(300px,380px)_minmax(0,1fr)]">

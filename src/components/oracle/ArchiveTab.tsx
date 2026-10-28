@@ -180,7 +180,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
         </Button>
       </div>
 
-      <p className="rounded-lg border border-slate-800 bg-slate-950/50 px-3 py-2 text-xs text-slate-500">
+      <p className="rounded-lg border border-slate-800 bg-slate-950/50 px-3 py-2 text-xs text-slate-400">
         <ScrollText className="mr-1.5 inline size-3.5 align-text-bottom" aria-hidden="true" />
         Proveniência: {dossier.provenance}
       </p>
@@ -212,15 +212,15 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
           </div>
           <div className="grid gap-2 text-xs text-slate-400 sm:grid-cols-3">
             <p>
-              <span className="text-slate-500">Incidente incitante: </span>
+              <span className="text-slate-400">Incidente incitante: </span>
               {structure.incitingIncident}
             </p>
             <p>
-              <span className="text-slate-500">Clímax: </span>
+              <span className="text-slate-400">Clímax: </span>
               {structure.climax}
             </p>
             <p>
-              <span className="text-slate-500">Resolução: </span>
+              <span className="text-slate-400">Resolução: </span>
               {structure.resolution}
             </p>
           </div>
@@ -236,7 +236,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
                   className={`rounded-md border px-2.5 py-1.5 text-xs ${
                     stage.present
                       ? "border-indigo-400/20 bg-indigo-500/5 text-slate-300"
-                      : "border-slate-800 bg-slate-900/30 text-slate-600"
+                      : "border-slate-800 bg-slate-900/30 text-slate-400"
                   }`}
                 >
                   <span className="flex items-center gap-1.5 font-medium">
@@ -285,7 +285,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
               ))}
             </ul>
             <p className="rounded-md border border-slate-800 bg-slate-900/40 p-2 text-[11px] leading-relaxed text-slate-400">
-              <span className="text-slate-500">Individuação: </span>
+              <span className="text-slate-400">Individuação: </span>
               {archetypes.individuation}
             </p>
           </CardContent>
@@ -445,7 +445,7 @@ function DossierDetail({ dossier }: { dossier: ReferenceDossier }) {
               </div>
             </div>
             <p className="text-xs leading-relaxed text-slate-400">
-              <span className="text-slate-500">Recepção: </span>
+              <span className="text-slate-400">Recepção: </span>
               {cultural.reception}
             </p>
           </CardContent>
@@ -488,7 +488,7 @@ function DossiersSection() {
                     {item.title}
                   </span>
                   <ChevronRight
-                    className={`size-3.5 shrink-0 ${active ? "text-indigo-300" : "text-slate-600"}`}
+                    className={`size-3.5 shrink-0 ${active ? "text-indigo-300" : "text-slate-400"}`}
                     aria-hidden="true"
                   />
                 </span>
@@ -550,7 +550,7 @@ function PromptsSection() {
           <ClipboardCopy className="size-4" aria-hidden="true" />
           Copiar tudo
         </Button>
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-slate-400">
           {PROMPT_LIBRARY.length} lentes · schemas sincronizados com o contrato
         </span>
       </div>
@@ -585,7 +585,7 @@ function PromptsSection() {
                   <span className="mt-1 block text-[11px] text-slate-400">{spec.theory}</span>
                 </span>
                 <ChevronRight
-                  className={`mt-1 size-4 shrink-0 text-slate-500 transition-transform ${
+                  className={`mt-1 size-4 shrink-0 text-slate-400 transition-transform ${
                     open ? "rotate-90" : ""
                   }`}
                   aria-hidden="true"
@@ -667,7 +667,7 @@ function CollectionCard({
             >
               {entry.name}
               <ArrowRight
-                className="size-3 text-slate-600 group-hover:text-indigo-300"
+                className="size-3 text-slate-400 group-hover:text-indigo-300"
                 aria-hidden="true"
               />
             </button>

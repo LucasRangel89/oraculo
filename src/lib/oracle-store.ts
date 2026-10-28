@@ -100,6 +100,7 @@ interface OracleState {
   // actions
   setTab: (tab: OracleTab) => void;
   setInput: (input: string) => void;
+  clearError: () => void;
   setDepth: (depth: AnalysisDepth) => void;
   loadRecent: () => Promise<void>;
   loadCatalog: () => Promise<void>;
@@ -393,6 +394,8 @@ export const useOracleStore = create<OracleState>()((set, get) => ({
       });
     }
   },
+
+  clearError: () => set({ error: null }),
 
   setWeights: (weights) => {
     set({ weights, weightsCustomized: true });

@@ -13,6 +13,7 @@
     "db:reset": "prisma migrate reset",
     "smoke": "node scripts/smoke.mjs",
     "typecheck": "tsc --noEmit",
+    "audit:a11y": "node scripts/a11y-audit.mjs",
     "build:pages": "node scripts/build-pages.mjs",
     "preview:pages": "node scripts/preview-pages.mjs",
     "verify:pages": "node scripts/verify-static.mjs",

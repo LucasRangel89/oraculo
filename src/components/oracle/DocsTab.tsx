@@ -486,7 +486,7 @@ export function DocsTab() {
         </p>
       </Section>
 
-      <p className="flex items-center justify-center gap-2 py-6 text-center text-xs text-slate-500">
+      <p className="flex items-center justify-center gap-2 py-6 text-center text-xs text-slate-400">
         <Sparkles className="size-3.5 text-amber-400/50" aria-hidden="true" />
         Construído para quem acredita que toda história nova é um eco antigo.
         <Sparkles className="size-3.5 text-amber-400/50" aria-hidden="true" />

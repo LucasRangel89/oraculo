@@ -56,6 +56,11 @@ jobs:
       - name: Checar tipos
         run: npm run typecheck
 
+      # Portão de acessibilidade: falha o deploy em regressões objetivas
+      # (contraste, teclado, nome acessível, HTML inválido).
+      - name: Auditar acessibilidade
+        run: npm run audit:a11y
+
       - name: Build estático
         env:
           PAGES_BASE_PATH: ${{ steps.base.outputs.path }}
